@@ -86,18 +86,6 @@ with_localinstall="no"
 AC_ARG_ENABLE(localinstall, AS_HELP_STRING([--enable-localinstall], [install all of the files localy instead of system directories (for distcheck)]), with_localinstall=$enableval, with_localinstall=no)
 
 ###########################
-# Internationalization
-###########################
-IT_PROG_INTLTOOL([0.41.0])
-
-GETTEXT_PACKAGE=libtimezonemap
-AC_SUBST(GETTEXT_PACKAGE)
-AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [Name of the default get text domain])
-AC_DEFINE_PATH(GNOMELOCALEDIR, "${datadir}/locale", [locale directory])
-
-AM_GLIB_GNU_GETTEXT
-
-###########################
 # Files
 ###########################
 
