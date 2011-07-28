@@ -1,6 +1,6 @@
 CLEANFILES = 
 
-uidir = $(pkgdatadir)/libmap/ui
+uidir = $(pkgdatadir)/libtimezonemap/ui
 dist_ui_DATA = \
 	data/bg.png \
 	data/cc.png \
@@ -45,21 +45,21 @@ dist_ui_DATA = \
 	data/timezone_-9.5.png \
 	data/timezone_9.5.png
 
-tzdatadir = $(pkgdatadir)/libmap/datetime
+tzdatadir = $(pkgdatadir)/libtimezonemap/datetime
 dist_tzdata_DATA = backward
 
 AM_CPPFLAGS =						\
-	$(LIBMAP_CFLAGS)				\
+	$(LIBTIMEZONEMAP_CFLAGS)				\
 	-DGNOMELOCALEDIR="\"$(datadir)/locale\""	\
-	-DGNOMECC_DATA_DIR="\"$(pkgdatadir)/libmap\""		\
+	-DGNOMECC_DATA_DIR="\"$(pkgdatadir)/libtimezonemap\""		\
 	-DDATADIR="\"$(uidir)\""			\
 	$(NULL)
 
 noinst_PROGRAMS = test-timezone
 
 test_timezone_SOURCES = test-timezone.c tz.c tz.h
-test_timezone_LDADD = $(LIBMAP_LIBS)
-test_timezone_CFLAGS = $(LIBMAP_CFLAGS)
+test_timezone_LDADD = $(LIBTIMEZONEMAP_LIBS)
+test_timezone_CFLAGS = $(LIBTIMEZONEMAP_CFLAGS)
 
 all-local: check-local
 
@@ -67,15 +67,15 @@ all-local: check-local
 check-local: test-timezone
 	$(builddir)/test-timezone $(srcdir)/data || :
 
-lib_LTLIBRARIES = libmap.la
+lib_LTLIBRARIES = libtimezonemap.la
 
-libmap_la_SOURCES =	\
+libtimezonemap_la_SOURCES =	\
 	cc-timezone-map.c	\
 	cc-timezone-map.h	\
 	tz.c tz.h
 
-libmap_la_LIBADD = $(LIBMAP_LIBS)
-libmap_la_LDFLAGS = \
+libtimezonemap_la_LIBADD = $(LIBTIMEZONEMAP_LIBS)
+libtimezonemap_la_LDFLAGS = \
 	-version-info 1:0:0 \
 	-no-undefined \
 	-export-symbols-regex "^[^_].*"
@@ -85,15 +85,15 @@ if HAVE_INTROSPECTION
 INTROSPECTION_SCANNER_ARGS = --add-include-path=$(srcdir)
 INTROSPECTION_COMPILER_ARGS = --includedir=$(srcdir)
 
-INTROSPECTION_GIRS = Map-1.0.gir
+INTROSPECTION_GIRS = TimezoneMap-1.0.gir
 
-introspection_sources = $(libmap_la_SOURCES)
+introspection_sources = $(libtimezonemap_la_SOURCES)
 
-Map-1.0.gir: libmap.la
-Map_1_0_gir_INCLUDES = GObject-2.0 Gtk-2.0
-Map_1_0_gir_CFLAGS = $(INCLUDES) --identifier-prefix=Cc
-Map_1_0_gir_LIBS = libmap.la
-Map_1_0_gir_FILES = $(introspection_sources)
+TimezoneMap-1.0.gir: libtimezonemap.la
+TimezoneMap_1_0_gir_INCLUDES = GObject-2.0 Gtk-2.0
+TimezoneMap_1_0_gir_CFLAGS = $(INCLUDES) --identifier-prefix=Cc
+TimezoneMap_1_0_gir_LIBS = libtimezonemap.la
+TimezoneMap_1_0_gir_FILES = $(introspection_sources)
 
 girdir = $(datadir)/gir-1.0
 gir_DATA = $(INTROSPECTION_GIRS)
