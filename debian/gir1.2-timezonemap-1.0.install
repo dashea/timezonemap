@@ -1,2 +1,2 @@
-debian/tmp/gtk2/usr/lib/girepository-1.0 /usr/share/lib/girepository-1.0
-debian/tmp/gtk2/usr/share/gir-1.0 /usr/share/gir-1.0/
+debian/tmp/gtk2/usr/lib/girepository-1.0/* /usr/lib/girepository-1.0/
+debian/tmp/gtk2/usr/share/gir-1.0/* /usr/share/gir-1.0/
