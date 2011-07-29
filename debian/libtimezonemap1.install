@@ -1,2 +1,2 @@
-debian/tmp/usr/lib/libtimezonemap* /usr/lib/
+debian/tmp/usr/lib/libtimezonemap.so.* /usr/lib/
 debian/tmp/usr/share/libtimezonemap /usr/share/
