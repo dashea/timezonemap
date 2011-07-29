@@ -1,5 +1,5 @@
 AC_INIT([libtimezonemap],
-        [0.0.1],
+        [1.0.0],
         [http://bugs.launchpad.net/libtimezonemap],
         [libtimezonemap],
         [http://launchpad.net/libtimezonemap])
@@ -42,16 +42,6 @@ AC_PATH_PROG([GLIB_GENMARSHAL], [glib-genmarshal])
 PKG_PROG_PKG_CONFIG
 
 ###########################
-# GTK+ version option
-###########################
-
-AC_ARG_WITH([gtk],
-  [AS_HELP_STRING([--with-gtk],
-    [Which version of gtk to use for the libtimezonemap @<:@default=3@:>@])],
-  [],
-  [with_gtk=3])
-
-###########################
 # Dependencies
 ###########################
 
@@ -60,13 +50,6 @@ GDK_REQUIRED_VERSION=2.22
 GLIB_REQUIRED_VERSION=2.26
 GTK3_REQUIRED_VERSION=3.1.4
 GIO_REQUIRED_VERSION=2.5.11
-
-AS_IF([test "x$with_gtk" = x3],
-    [PKG_CHECK_MODULES(INDICATOR, glib-2.0 >= $GLIB_REQUIRED_VERSION)],
-      [test "x$with_gtk" = x2],
-    [PKG_CHECK_MODULES(INDICATOR, glib-2.0 >= $GLIB_REQUIRED_VERSION)],
-    [AC_MSG_FAILURE([Value for --with-gtk was neither 2 nor 3])]
-)
 
 PKG_CHECK_MODULES(LIBTIMEZONEMAP, gio-2.0 >= $GIO_REQUIRED_VERSION
                                   gtk+-3.0 >= $GTK3_REQUIRED_VERSION)
@@ -102,7 +85,7 @@ AC_OUTPUT
 
 AC_MSG_NOTICE([
 
-Date and Time Indicator Configuration:
+Timezone Map Configuration:
 
 	Prefix:        $prefix
 ])

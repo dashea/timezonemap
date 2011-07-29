@@ -27,16 +27,21 @@ Depends: ${misc:Depends},
 Description: typelib interface for libtimezonemap
  A simple clock appearing in the indicator bar
 
-Package: libtimezonemap
+Package: libtimezonemap1
+Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, 
          ${misc:Depends}
 Description: GTK+3 timezone map widget
  Timezone map widget for GTK+3
 
-Package: libtimezonemap-gtk2
+Package: libtimezonemap1-dev
+Section: libdevel
 Architecture: any
 Depends: ${shlibs:Depends}, 
-         ${misc:Depends}
-Description: GTK+2 timezone map widget
- Timezone map widget for GTK+2
+         ${misc:Depends},
+         libtimezonemap1 (= ${binary:Version}),
+Description: GTK+3 timezone map widget - development files
+ Timezone map widget for GTK+3
+ .
+ This package contains files that are needed to build applications.
