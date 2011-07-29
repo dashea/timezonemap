@@ -1,6 +1,6 @@
 CLEANFILES = 
 
-uidir = $(pkgdatadir)/libtimezonemap/ui
+uidir = $(pkgdatadir)/ui
 dist_ui_DATA = \
 	data/bg.png \
 	data/cc.png \
@@ -45,13 +45,13 @@ dist_ui_DATA = \
 	data/timezone_-9.5.png \
 	data/timezone_9.5.png
 
-tzdatadir = $(pkgdatadir)/libtimezonemap/datetime
+tzdatadir = $(pkgdatadir)/
 dist_tzdata_DATA = backward
 
 AM_CPPFLAGS =						\
 	$(LIBTIMEZONEMAP_CFLAGS)				\
 	-DGNOMELOCALEDIR="\"$(datadir)/locale\""	\
-	-DGNOMECC_DATA_DIR="\"$(pkgdatadir)/libtimezonemap\""		\
+	-DGNOMECC_DATA_DIR="\"$(pkgdatadir)\""		\
 	-DDATADIR="\"$(uidir)\""			\
 	$(NULL)
 
