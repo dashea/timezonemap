@@ -27,6 +27,7 @@
 #define _E_TZ_H
 
 #include <glib.h>
+#include <glib-object.h>
 
 #ifndef __sun
 #  define TZ_DATA_FILE "/usr/share/zoneinfo/zone.tab"
@@ -34,9 +35,50 @@
 #  define TZ_DATA_FILE "/usr/share/lib/zoneinfo/tab/zone_sun.tab"
 #endif
 
+G_BEGIN_DECLS
+
+#define CC_TYPE_TIMEZONE_LOCATION cc_timezone_location_get_type()
+
+#define CC_TIMEZONE_LOCATION(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), \
+  CC_TYPE_TIMEZONE_LOCATION, CcTimezoneLocation))
+
+#define CC_TIMEZONE_LOCATION_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), \
+  CC_TYPE_TIMEZONE_LOCATION, CcTimezoneLocationClass))
+
+#define CC_IS_TIMEZONE_LOCATION(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), \
+  CC_TYPE_TIMEZONE_LOCATION))
+
+#define CC_IS_TIMEZONE_LOCATION_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), \
+  CC_TYPE_TIMEZONE_LOCATION))
+
+#define CC_TIMEZONE_LOCATION_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), \
+  CC_TYPE_TIMEZONE_LOCATION, CcTimezoneLocationClass))
+
 typedef struct _TzDB TzDB;
-typedef struct _TzLocation TzLocation;
 typedef struct _TzInfo TzInfo;
+typedef struct _CcTimezoneLocation CcTimezoneLocation;
+typedef struct _CcTimezoneLocationClass CcTimezoneLocationClass;
+typedef struct _CcTimezoneLocationPrivate CcTimezoneLocationPrivate;
+
+struct _CcTimezoneLocation
+{
+  GObject parent;
+  CcTimezoneLocationPrivate *priv;
+};
+
+struct _CcTimezoneLocationClass
+{
+  GObjectClass parent_class;
+};
+
+GType cc_timezone_location_get_type (void) G_GNUC_CONST;
+
+CcTimezoneLocation *cc_timezone_location_new (void);
 
 
 struct _TzDB
@@ -44,16 +86,6 @@ struct _TzDB
 	GPtrArray *locations;
 };
 
-struct _TzLocation
-{
-	gchar *country;
-	gdouble latitude;
-	gdouble longitude;
-	gchar *zone;
-	gchar *comment;
-
-	gdouble dist; /* distance to clicked point for comparison */
-};
 
 /* see the glibc info page information on time zone information */
 /*  tzname_normal    is the default name for the timezone */
@@ -73,14 +105,11 @@ struct _TzInfo
 TzDB      *tz_load_db                 (void);
 void       tz_db_free                 (TzDB *db);
 GPtrArray *tz_get_locations           (TzDB *db);
-void       tz_location_get_position   (TzLocation *loc,
-				       double *longitude, double *latitude);
-char      *tz_location_get_country    (TzLocation *loc);
-gchar     *tz_location_get_zone       (TzLocation *loc);
-gchar     *tz_location_get_comment    (TzLocation *loc);
-glong      tz_location_get_utc_offset (TzLocation *loc);
-gint       tz_location_set_locally    (TzLocation *loc);
-TzInfo    *tz_info_from_location      (TzLocation *loc);
+glong      tz_location_get_utc_offset (CcTimezoneLocation *loc);
+gint       tz_location_set_locally    (CcTimezoneLocation *loc);
+TzInfo    *tz_info_from_location      (CcTimezoneLocation *loc);
 void       tz_info_free               (TzInfo *tz_info);
+
+G_END_DECLS
 
 #endif

@@ -63,7 +63,7 @@ struct _CcTimezoneMapPrivate
   gchar *watermark;
 
   TzDB *tzdb;
-  TzLocation *location;
+  CcTimezoneLocation *location;
   GHashTable *alias_db;
 };
 
@@ -813,8 +813,14 @@ cc_timezone_map_draw (GtkWidget *widget,
       g_clear_error (&err);
     }
 
-  pointx = convert_longtitude_to_x (priv->location->longitude, alloc.width);
-  pointy = convert_latitude_to_y (priv->location->latitude, alloc.height);
+  GValue lat = {0};
+  GValue lon = {0};
+  g_value_init (&lat, G_TYPE_DOUBLE);
+  g_value_init (&lon, G_TYPE_DOUBLE);
+  g_object_get_property(G_OBJECT (priv->location), "latitude", &lat);
+  g_object_get_property(G_OBJECT (priv->location), "longitude", &lon);
+  pointx = convert_longtitude_to_x (g_value_get_double(&lon), alloc.width);
+  pointy = convert_latitude_to_y (g_value_get_double(&lat), alloc.height);
 
   if (pointy > alloc.height)
     pointy = alloc.height;
@@ -854,20 +860,29 @@ cc_timezone_map_class_init (CcTimezoneMapClass *klass)
                                             0,
                                             NULL,
                                             NULL,
-                                            g_cclosure_marshal_VOID__POINTER,
+                                            g_cclosure_marshal_VOID__OBJECT,
                                             G_TYPE_NONE, 1,
-                                            G_TYPE_POINTER);
+                                            CC_TYPE_TIMEZONE_LOCATION);
 }
 
 
 static gint
-sort_locations (TzLocation *a,
-                TzLocation *b)
+sort_locations (CcTimezoneLocation *a,
+                CcTimezoneLocation *b)
 {
-  if (a->dist > b->dist)
+  GValue val_a = {0};
+  GValue val_b = {0};
+  gdouble dist_a, dist_b;
+  g_value_init (&val_a, G_TYPE_DOUBLE);
+  g_value_init (&val_b, G_TYPE_DOUBLE);
+  g_object_get_property(G_OBJECT (a), "dist", &val_a);
+  g_object_get_property(G_OBJECT (b), "dist", &val_b);
+  dist_a = g_value_get_double(&val_a);
+  dist_b = g_value_get_double(&val_b);
+  if (dist_a > dist_b)
     return 1;
 
-  if (a->dist < b->dist)
+  if (dist_a < dist_b)
     return -1;
 
   return 0;
@@ -875,7 +890,7 @@ sort_locations (TzLocation *a,
 
 static void
 set_location (CcTimezoneMap *map,
-              TzLocation    *location)
+              CcTimezoneLocation    *location)
 {
   CcTimezoneMapPrivate *priv = map->priv;
   TzInfo *info;
@@ -892,7 +907,7 @@ set_location (CcTimezoneMap *map,
   tz_info_free (info);
 }
 
-static TzLocation *
+static CcTimezoneLocation *
 get_loc_for_xy (GtkWidget * widget, gint x, gint y)
 {
   CcTimezoneMapPrivate *priv = CC_TIMEZONE_MAP (widget)->priv;
@@ -905,6 +920,13 @@ get_loc_for_xy (GtkWidget * widget, gint x, gint y)
   gint width, height;
   GList *distances = NULL;
   GtkAllocation alloc;
+
+  GValue glon = {0};
+  GValue glat = {0};
+  GValue gdist = {0};
+  g_value_init (&glon, G_TYPE_DOUBLE);
+  g_value_init (&glat, G_TYPE_DOUBLE);
+  g_value_init (&gdist, G_TYPE_DOUBLE);
 
   rowstride = priv->visible_map_rowstride;
   pixels = priv->visible_map_pixels;
@@ -937,21 +959,23 @@ get_loc_for_xy (GtkWidget * widget, gint x, gint y)
   for (i = 0; i < array->len; i++)
     {
       gdouble pointx, pointy, dx, dy;
-      TzLocation *loc = array->pdata[i];
+      CcTimezoneLocation *loc = array->pdata[i];
 
-      pointx = convert_longtitude_to_x (loc->longitude, width);
-      pointy = convert_latitude_to_y (loc->latitude, height);
+      g_object_get_property(G_OBJECT (loc), "longitude", &glon);
+      g_object_get_property(G_OBJECT (loc), "latitude", &glat);
+      pointx = convert_longtitude_to_x (g_value_get_double(&glon), width);
+      pointy = convert_latitude_to_y (g_value_get_double(&glat), height);
 
       dx = pointx - x;
       dy = pointy - y;
 
-      loc->dist = dx * dx + dy * dy;
+      g_value_set_double(&gdist, (gdouble) dx * dx + dy * dy);
+      g_object_set_property(G_OBJECT (loc), "dist", &gdist);
       distances = g_list_prepend (distances, loc);
-
     }
   distances = g_list_sort (distances, (GCompareFunc) sort_locations);
 
-  TzLocation * loc = (TzLocation*) distances->data;
+  CcTimezoneLocation * loc = (CcTimezoneLocation*) distances->data;
 
   g_list_free (distances);
 
@@ -962,7 +986,7 @@ static gboolean
 button_press_event (GtkWidget      *widget,
                     GdkEventButton *event)
 {
-  TzLocation * loc = get_loc_for_xy (widget, event->x, event->y);
+  CcTimezoneLocation * loc = get_loc_for_xy (widget, event->x, event->y);
   set_location (CC_TIMEZONE_MAP (widget), loc);
   return TRUE;
 }
@@ -1087,6 +1111,8 @@ cc_timezone_map_set_timezone (CcTimezoneMap *map,
   GPtrArray *locations;
   guint i;
   char *real_tz;
+  GValue zone = {0};
+  g_value_init (&zone, G_TYPE_STRING);
 
   real_tz = g_hash_table_lookup (map->priv->alias_db, timezone);
 
@@ -1094,9 +1120,10 @@ cc_timezone_map_set_timezone (CcTimezoneMap *map,
 
   for (i = 0; i < locations->len; i++)
     {
-      TzLocation *loc = locations->pdata[i];
+      CcTimezoneLocation *loc = locations->pdata[i];
+      g_object_get_property(G_OBJECT (loc), "zone", &zone);
 
-      if (!g_strcmp0 (loc->zone, real_tz ? real_tz : timezone))
+      if (!g_strcmp0 (g_value_get_string(&zone), real_tz ? real_tz : timezone))
         {
           set_location (map, loc);
           break;
@@ -1132,11 +1159,13 @@ cc_timezone_map_get_timezone_at_coords (CcTimezoneMap *map, gdouble lon, gdouble
   }
   else {
     GtkAllocation alloc;
+    GValue val_zone = {0};
+    g_value_init (&val_zone, G_TYPE_STRING);
     gtk_widget_get_allocation (GTK_WIDGET (map), &alloc);
     x = convert_longtitude_to_x(lon, alloc.width);
     y = convert_latitude_to_y(lat, alloc.height);
-    TzLocation * loc = get_loc_for_xy(GTK_WIDGET (map), x, y);
-    return loc->zone;
+    CcTimezoneLocation * loc = get_loc_for_xy(GTK_WIDGET (map), x, y);
+    return g_value_get_string(&val_zone);
   }
 }
 
@@ -1150,7 +1179,7 @@ cc_timezone_map_set_watermark (CcTimezoneMap *map, const gchar * watermark)
   gtk_widget_queue_draw (GTK_WIDGET (map));
 }
 
-TzLocation *
+CcTimezoneLocation *
 cc_timezone_map_get_location (CcTimezoneMap *map)
 {
   return map->priv->location;
