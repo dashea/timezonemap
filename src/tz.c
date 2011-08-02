@@ -281,7 +281,7 @@ tz_load_db (void)
 		lngstr = g_strdup (p);
 		*p = '\0';
 		
-    loc = cc_timezone_location_new ();
+		loc = cc_timezone_location_new ();
 		loc->priv->country = g_strdup (tmpstrarr[0]);
 		loc->priv->zone = g_strdup (tmpstrarr[2]);
 		loc->priv->latitude  = convert_pos (latstr, 2);
@@ -295,7 +295,7 @@ tz_load_db (void)
 			CcTimezoneLocation *locgrp;
 
 			/* duplicate entry */
-      locgrp = cc_timezone_location_new ();
+			locgrp = cc_timezone_location_new ();
 			locgrp->country = g_strdup (tmpstrarr[0]);
 			locgrp->zone = g_strdup (tmpstrarr[3]);
 			locgrp->latitude  = convert_pos (latstr, 2);
@@ -328,7 +328,7 @@ tz_load_db (void)
 void
 tz_db_free (TzDB *db)
 {
-	//FIXME g_ptr_array_foreach (db->locations, (GFunc) tz_location_free, NULL);
+	g_ptr_array_foreach (db->locations, (GFunc) g_object_unref, NULL);
 	g_ptr_array_free (db->locations, TRUE);
 	g_free (db);
 }
