@@ -3,7 +3,7 @@
  * Copyright (C) 2011 Canonical Ltd.
  *
  * Portions from Ubiquity, Copyright (C) 2009 Canonical Ltd.
- * Written by Evan Dandrea <evand@ubuntu.com>
+ * Written by Evan Dandrea <ev@ubuntu.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
