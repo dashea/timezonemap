@@ -14,6 +14,7 @@ Build-Depends: cdbs,
                libcairo2-dev (>= 1.10),
                dh-autoreconf
 Standards-Version: 3.9.2
+Vcs-Bzr: http://bazaar.launchpad.net/~timezonemap-team/timezonemap/trunk
 
 Package: gir1.2-timezonemap-1.0
 Section: libs
@@ -21,7 +22,10 @@ Architecture: any
 Depends: ${misc:Depends},
          ${gir:Depends}
 Description: typelib interface for libtimezonemap
- A simple clock appearing in the indicator bar
+ Timezone map widget for GTK+3
+ .
+ This package can be used by other packages using the GIRepository format to
+ generate dynamic bindings for libtimezonemap1.
 
 Package: libtimezonemap1
 Section: libs
