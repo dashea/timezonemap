@@ -30,6 +30,7 @@
 #include <time.h>
 #include <math.h>
 #include <string.h>
+#include <float.h>
 #include "tz.h"
 
 
@@ -39,6 +40,202 @@ static float convert_pos (gchar *pos, int digits);
 static int compare_country_names (const void *a, const void *b);
 static void sort_locations_by_country (GPtrArray *locations);
 static gchar * tz_data_file_get (void);
+
+G_DEFINE_TYPE (CcTimezoneLocation, cc_timezone_location, G_TYPE_OBJECT)
+
+#define TIMEZONE_LOCATION_PRIVATE(o) \
+  (G_TYPE_INSTANCE_GET_PRIVATE ((o), CC_TYPE_TIMEZONE_LOCATION, CcTimezoneLocationPrivate))
+
+struct _CcTimezoneLocationPrivate
+{
+	gchar *country;
+	gdouble latitude;
+	gdouble longitude;
+	gchar *zone;
+	gchar *comment;
+
+	gdouble dist; /* distance to clicked point for comparison */
+};
+
+enum {
+  PROP_0,
+  PROP_COUNTRY,
+  PROP_LATITUDE,
+  PROP_LONGITUDE,
+  PROP_ZONE,
+  PROP_COMMENT,
+  PROP_DIST
+};
+
+static void
+cc_timezone_location_get_property (GObject    *object,
+                              guint       property_id,
+                              GValue     *value,
+                              GParamSpec *pspec)
+{
+  CcTimezoneLocationPrivate *priv = CC_TIMEZONE_LOCATION (object)->priv;
+  switch (property_id)
+    {
+    case PROP_COUNTRY:
+      g_value_set_string (value, priv->country);
+      break;
+    case PROP_LATITUDE:
+      g_value_set_double (value, priv->latitude);
+      break;
+    case PROP_LONGITUDE:
+      g_value_set_double (value, priv->longitude);
+      break;
+    case PROP_ZONE:
+      g_value_set_string (value, priv->zone);
+      break;
+    case PROP_COMMENT:
+      g_value_set_string (value, priv->comment);
+      break;
+    case PROP_DIST:
+      g_value_set_double (value, priv->dist);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    }
+}
+
+static void
+cc_timezone_location_set_property (GObject      *object,
+                              guint         property_id,
+                              const GValue *value,
+                              GParamSpec   *pspec)
+{
+  CcTimezoneLocationPrivate *priv = CC_TIMEZONE_LOCATION (object)->priv;
+  switch (property_id)
+    {
+    case PROP_COUNTRY:
+      priv->country = g_value_get_string(value);
+      break;
+    case PROP_LATITUDE:
+      priv->latitude = g_value_get_double(value);
+      break;
+    case PROP_LONGITUDE:
+      priv->longitude = g_value_get_double(value);
+      break;
+    case PROP_ZONE:
+      priv->zone = g_value_get_string(value);
+      break;
+    case PROP_COMMENT:
+      priv->comment = g_value_get_string(value);
+      break;
+    case PROP_DIST:
+      priv->dist = g_value_get_double(value);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    }
+}
+
+static void
+cc_timezone_location_dispose (GObject *object)
+{
+  CcTimezoneLocationPrivate *priv = CC_TIMEZONE_LOCATION (object)->priv;
+
+  if (priv->country)
+    {
+      g_object_unref (priv->country);
+      priv->country = NULL;
+    }
+
+  if (priv->zone)
+    {
+      g_object_unref (priv->zone);
+      priv->zone = NULL;
+    }
+
+  if (priv->comment)
+    {
+      g_object_unref (priv->comment);
+      priv->comment = NULL;
+    }
+
+  G_OBJECT_CLASS (cc_timezone_location_parent_class)->dispose (object);
+}
+
+static void
+cc_timezone_location_finalize (GObject *object)
+{
+  CcTimezoneLocationPrivate *priv = CC_TIMEZONE_LOCATION (object)->priv;
+  G_OBJECT_CLASS (cc_timezone_location_parent_class)->finalize (object);
+}
+
+static void
+cc_timezone_location_class_init (CcTimezoneLocationClass *klass)
+{
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  g_type_class_add_private (klass, sizeof (CcTimezoneLocationPrivate));
+
+  object_class->get_property = cc_timezone_location_get_property;
+  object_class->set_property = cc_timezone_location_set_property;
+  object_class->dispose = cc_timezone_location_dispose;
+  object_class->finalize = cc_timezone_location_finalize;
+
+  g_object_class_install_property(object_class,
+                                  PROP_COUNTRY,
+                                  g_param_spec_string ("country",
+                                          "Country",
+                                          "The country for the location",
+                                          "",
+                                          G_PARAM_READWRITE));
+  g_object_class_install_property(object_class,
+                                  PROP_LATITUDE,
+                                  g_param_spec_double ("latitude",
+                                          "Latitude",
+                                          "The latitude for the location",
+                                          -90.0,
+                                          90.0,
+                                          0.0,
+                                          G_PARAM_READWRITE));
+  g_object_class_install_property(object_class,
+                                  PROP_LONGITUDE,
+                                  g_param_spec_double ("longitude",
+                                          "Longitude",
+                                          "The longitude for the location",
+                                          -180.0,
+                                          180.0,
+                                          0.0,
+                                          G_PARAM_READWRITE));
+  g_object_class_install_property(object_class,
+                                  PROP_ZONE,
+                                  g_param_spec_string ("zone",
+                                          "Zone",
+                                          "The time zone for the location",
+                                          "",
+                                          G_PARAM_READWRITE));
+  g_object_class_install_property(object_class,
+                                  PROP_COMMENT,
+                                  g_param_spec_string ("Comment",
+                                          "Comment",
+                                          "A comment for the location",
+                                          "",
+                                          G_PARAM_READWRITE));
+  g_object_class_install_property(object_class,
+                                  PROP_DIST,
+                                  g_param_spec_double ("dist",
+                                          "Distance",
+                                          "The distance for the location",
+                                          0.0,
+                                          DBL_MAX,
+                                          0.0,
+                                          G_PARAM_READWRITE));
+}
+
+static void
+cc_timezone_location_init (CcTimezoneLocation *self) {
+  CcTimezoneLocationPrivate *priv;
+  priv = self->priv = TIMEZONE_LOCATION_PRIVATE (self);
+}
+
+CcTimezoneLocation *
+cc_timezone_location_new (void)
+{
+  return g_object_new (CC_TYPE_TIMEZONE_LOCATION, NULL);
+}
 
 
 /* ---------------- *
@@ -71,7 +268,7 @@ tz_load_db (void)
 	{
 		gchar **tmpstrarr;
 		gchar *latstr, *lngstr, *p;
-		TzLocation *loc;
+		CcTimezoneLocation *loc;
 
 		if (*buf == '#') continue;
 
@@ -84,21 +281,21 @@ tz_load_db (void)
 		lngstr = g_strdup (p);
 		*p = '\0';
 		
-		loc = g_new0 (TzLocation, 1);
-		loc->country = g_strdup (tmpstrarr[0]);
-		loc->zone = g_strdup (tmpstrarr[2]);
-		loc->latitude  = convert_pos (latstr, 2);
-		loc->longitude = convert_pos (lngstr, 3);
+		loc = cc_timezone_location_new ();
+		loc->priv->country = g_strdup (tmpstrarr[0]);
+		loc->priv->zone = g_strdup (tmpstrarr[2]);
+		loc->priv->latitude  = convert_pos (latstr, 2);
+		loc->priv->longitude = convert_pos (lngstr, 3);
 		
 #ifdef __sun
 		if (tmpstrarr[3] && *tmpstrarr[3] == '-' && tmpstrarr[4])
 			loc->comment = g_strdup (tmpstrarr[4]);
 
 		if (tmpstrarr[3] && *tmpstrarr[3] != '-' && !islower(loc->zone)) {
-			TzLocation *locgrp;
+			CcTimezoneLocation *locgrp;
 
 			/* duplicate entry */
-			locgrp = g_new0 (TzLocation, 1);
+			locgrp = cc_timezone_location_new ();
 			locgrp->country = g_strdup (tmpstrarr[0]);
 			locgrp->zone = g_strdup (tmpstrarr[3]);
 			locgrp->latitude  = convert_pos (latstr, 2);
@@ -108,7 +305,7 @@ tz_load_db (void)
 			g_ptr_array_add (tz_db->locations, (gpointer) locgrp);
 		}
 #else
-		loc->comment = (tmpstrarr[3]) ? g_strdup(tmpstrarr[3]) : NULL;
+		loc->priv->comment = (tmpstrarr[3]) ? g_strdup(tmpstrarr[3]) : NULL;
 #endif
 
 		g_ptr_array_add (tz_db->locations, (gpointer) loc);
@@ -128,32 +325,22 @@ tz_load_db (void)
 	return tz_db;
 }    
 
-static void
-tz_location_free (TzLocation *loc)
-{
-	g_free (loc->country);
-	g_free (loc->zone);
-	g_free (loc->comment);
-
-	g_free (loc);
-}
-
 void
 tz_db_free (TzDB *db)
 {
-	g_ptr_array_foreach (db->locations, (GFunc) tz_location_free, NULL);
+	g_ptr_array_foreach (db->locations, (GFunc) g_object_unref, NULL);
 	g_ptr_array_free (db->locations, TRUE);
 	g_free (db);
 }
 
 static gint
-sort_locations (TzLocation *a,
-                TzLocation *b)
+sort_locations (CcTimezoneLocation *a,
+                CcTimezoneLocation *b)
 {
-  if (a->dist > b->dist)
+  if (a->priv->dist > b->priv->dist)
     return 1;
 
-  if (a->dist < b->dist)
+  if (a->priv->dist < b->priv->dist)
     return -1;
 
   return 0;
@@ -201,37 +388,8 @@ tz_get_locations (TzDB *db)
 	return db->locations;
 }
 
-
-gchar *
-tz_location_get_country (TzLocation *loc)
-{
-	return loc->country;
-}
-
-
-gchar *
-tz_location_get_zone (TzLocation *loc)
-{
-	return loc->zone;
-}
-
-
-gchar *
-tz_location_get_comment (TzLocation *loc)
-{
-	return loc->comment;
-}
-
-
-void
-tz_location_get_position (TzLocation *loc, double *longitude, double *latitude)
-{
-	*longitude = loc->longitude;
-	*latitude = loc->latitude;
-}
-
 glong
-tz_location_get_utc_offset (TzLocation *loc)
+tz_location_get_utc_offset (CcTimezoneLocation *loc)
 {
 	TzInfo *tz_info;
 	glong offset;
@@ -243,7 +401,7 @@ tz_location_get_utc_offset (TzLocation *loc)
 }
 
 gint
-tz_location_set_locally (TzLocation *loc)
+tz_location_set_locally (CcTimezoneLocation *loc)
 {
 	time_t curtime;
 	struct tm *curzone;
@@ -251,13 +409,13 @@ tz_location_set_locally (TzLocation *loc)
 	gint correction = 0;
 
 	g_return_val_if_fail (loc != NULL, 0);
-	g_return_val_if_fail (loc->zone != NULL, 0);
+	g_return_val_if_fail (loc->priv->zone != NULL, 0);
 	
 	curtime = time (NULL);
 	curzone = localtime (&curtime);
 	is_dst = curzone->tm_isdst;
 
-	setenv ("TZ", loc->zone, 1);
+	setenv ("TZ", loc->priv->zone, 1);
 #if 0
 	curtime = time (NULL);
 	curzone = localtime (&curtime);
@@ -274,16 +432,16 @@ tz_location_set_locally (TzLocation *loc)
 }
 
 TzInfo *
-tz_info_from_location (TzLocation *loc)
+tz_info_from_location (CcTimezoneLocation *loc)
 {
 	TzInfo *tzinfo;
 	time_t curtime;
 	struct tm *curzone;
 	
 	g_return_val_if_fail (loc != NULL, NULL);
-	g_return_val_if_fail (loc->zone != NULL, NULL);
+	g_return_val_if_fail (loc->priv->zone != NULL, NULL);
 	
-	setenv ("TZ", loc->zone, 1);
+	setenv ("TZ", loc->priv->zone, 1);
 	
 #if 0
 	tzset ();
@@ -361,33 +519,13 @@ convert_pos (gchar *pos, int digits)
 	else return t1 - t2/pow (10.0, strlen(fraction));
 }
 
-
-#if 0
-
-/* Currently not working */
-static void
-free_tzdata (TzLocation *tz)
-{
-	
-	if (tz->country)
-	  g_free(tz->country);
-	if (tz->zone)
-	  g_free(tz->zone);
-	if (tz->comment)
-	  g_free(tz->comment);
-	
-	g_free(tz);
-}
-#endif
-
-
 static int
 compare_country_names (const void *a, const void *b)
 {
-	const TzLocation *tza = * (TzLocation **) a;
-	const TzLocation *tzb = * (TzLocation **) b;
+	const CcTimezoneLocation *tza = * (CcTimezoneLocation **) a;
+	const CcTimezoneLocation *tzb = * (CcTimezoneLocation **) b;
 	
-	return strcmp (tza->zone, tzb->zone);
+	return strcmp (tza->priv->zone, tzb->priv->zone);
 }
 
 

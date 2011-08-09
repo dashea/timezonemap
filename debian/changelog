@@ -1,3 +1,9 @@
+libtimezonemap (0.2) UNRELEASED; urgency=low
+
+  * Expose TzLocations as GObjects.
+
+ -- Evan Dandrea <ev@ubuntu.com>  Tue, 09 Aug 2011 10:23:25 +0100
+
 libtimezonemap (0.1) oneiric; urgency=low
 
   * Initial release.

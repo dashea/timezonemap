@@ -22,14 +22,20 @@ int main (int argc, char **argv)
 		return 1;
 	}
 
+	g_type_init();
+	GValue zone = {0};
+	g_value_init(&zone, G_TYPE_STRING);
+
 	db = tz_load_db ();
 	locs = tz_get_locations (db);
 	for (i = 0; i < locs->len ; i++) {
-		TzLocation *loc = locs->pdata[i];
+		CcTimezoneLocation *loc = locs->pdata[i];
+
 		TzInfo *info;
 		char *filename, *path;
 		gdouble selected_offset;
-                char buf[16];
+		char buf[16];
+		g_object_get_property(G_OBJECT (loc), "zone", &zone);
 
 		info = tz_info_from_location (loc);
 		selected_offset = tz_location_get_utc_offset (loc)
@@ -41,7 +47,7 @@ int main (int argc, char **argv)
 		path = g_build_filename (pixmap_dir, filename, NULL);
 
 		if (g_file_test (path, G_FILE_TEST_IS_REGULAR) == FALSE) {
-			g_message ("File '%s' missing for zone '%s'", filename, loc->zone);
+			g_message ("File '%s' missing for zone '%s'", filename, g_value_get_string(&zone));
 			retval = 1;
 		}
 
