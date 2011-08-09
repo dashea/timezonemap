@@ -1,5 +1,5 @@
-libtimezonemap (0.1) UNRELEASED; urgency=low
+libtimezonemap (0.1) oneiric; urgency=low
 
   * Initial release.
 
- -- Evan Dandrea <ev@ubuntu.com>  Thu, 28 Jul 2011 12:01:53 +0100
+ -- Evan Dandrea <ev@ubuntu.com>  Wed, 03 Aug 2011 10:21:41 +0100
