@@ -48,6 +48,9 @@ dist_ui_DATA = \
 tzdatadir = $(pkgdatadir)/
 dist_tzdata_DATA = backward
 
+pkgconfigdir = $(libdir)/pkgconfig
+dist_pkgconfig_DATA = timezonemap.pc
+
 AM_CPPFLAGS =						\
 	$(LIBTIMEZONEMAP_CFLAGS)				\
 	-DGNOMELOCALEDIR="\"$(datadir)/locale\""	\
@@ -58,7 +61,7 @@ AM_CPPFLAGS =						\
 noinst_PROGRAMS = test-timezone
 
 test_timezone_SOURCES = test-timezone.c tz.c tz.h
-test_timezone_LDADD = $(LIBTIMEZONEMAP_LIBS)
+test_timezone_LDADD = $(LIBTIMEZONEMAP_LIBS) -lm
 test_timezone_CFLAGS = $(LIBTIMEZONEMAP_CFLAGS)
 
 all-local: check-local
@@ -72,9 +75,20 @@ lib_LTLIBRARIES = libtimezonemap.la
 libtimezonemap_la_SOURCES =	\
 	cc-timezone-map.c	\
 	cc-timezone-map.h	\
+	timezone-completion.c	\
+	timezone-completion.h	\
 	tz.c tz.h
 
-libtimezonemap_la_LIBADD = $(LIBTIMEZONEMAP_LIBS)
+# Specify 'timezonemap' twice: once for package (so we could eventually add
+# a timezonemap-gtk4 for example), and once for namespacing inside code so
+# that users do "#include <timezonemap/tz.h>" instead of "#include <tz.h>"
+timezonemapincludesdir = $(includedir)/timezonemap/timezonemap
+timezonemapincludes_HEADERS = \
+  cc-timezone-map.h \
+  timezone-completion.h \
+  tz.h
+
+libtimezonemap_la_LIBADD = $(LIBTIMEZONEMAP_LIBS) -lm
 libtimezonemap_la_LDFLAGS = \
 	-version-info 1:0:0 \
 	-no-undefined \
@@ -90,7 +104,7 @@ INTROSPECTION_GIRS = TimezoneMap-1.0.gir
 introspection_sources = $(libtimezonemap_la_SOURCES)
 
 TimezoneMap-1.0.gir: libtimezonemap.la
-TimezoneMap_1_0_gir_INCLUDES = GObject-2.0 Gtk-3.0
+TimezoneMap_1_0_gir_INCLUDES = GObject-2.0 Gtk-3.0 Json-1.0
 TimezoneMap_1_0_gir_CFLAGS = $(INCLUDES) --identifier-prefix=Cc
 TimezoneMap_1_0_gir_LIBS = libtimezonemap.la
 TimezoneMap_1_0_gir_FILES = $(introspection_sources)

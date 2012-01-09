@@ -138,19 +138,19 @@ cc_timezone_location_dispose (GObject *object)
 
   if (priv->country)
     {
-      g_object_unref (priv->country);
+      g_free (priv->country);
       priv->country = NULL;
     }
 
   if (priv->zone)
     {
-      g_object_unref (priv->zone);
+      g_free (priv->zone);
       priv->zone = NULL;
     }
 
   if (priv->comment)
     {
-      g_object_unref (priv->comment);
+      g_free (priv->comment);
       priv->comment = NULL;
     }
 

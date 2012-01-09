@@ -12,6 +12,7 @@ Build-Depends: cdbs,
                libglib2.0-dev (>= 2.25.0),
                libgtk-3-dev (>= 3.1.4),
                libcairo2-dev (>= 1.10),
+               libjson-glib-dev,
                dh-autoreconf
 Standards-Version: 3.9.2
 Vcs-Bzr: http://bazaar.launchpad.net/~timezonemap-team/timezonemap/trunk
@@ -41,6 +42,8 @@ Architecture: any
 Depends: ${shlibs:Depends}, 
          ${misc:Depends},
          libtimezonemap1 (= ${binary:Version}),
+Replaces: gir1.2-timezonemap-1.0 (<< 0.3)
+Breaks: gir1.2-timezonemap-1.0 (<< 0.3)
 Description: GTK+3 timezone map widget - development files
  Timezone map widget for GTK+3
  .
