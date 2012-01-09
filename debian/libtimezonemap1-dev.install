@@ -1,2 +1,4 @@
-#debian/tmp/usr/lib/libtimezonemap.a /usr/lib/
-debian/tmp/usr/lib/libtimezonemap.so /usr/lib/
+debian/tmp/usr/lib/libtimezonemap.so
+debian/tmp/usr/share/gir-1.0
+debian/tmp/usr/include
+debian/tmp/usr/lib/pkgconfig

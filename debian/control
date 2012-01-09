@@ -41,6 +41,8 @@ Architecture: any
 Depends: ${shlibs:Depends}, 
          ${misc:Depends},
          libtimezonemap1 (= ${binary:Version}),
+Replaces: gir1.2-timezonemap-1.0 (<< 0.2.1)
+Breaks: gir1.2-timezonemap-1.0 (<< 0.2.1)
 Description: GTK+3 timezone map widget - development files
  Timezone map widget for GTK+3
  .

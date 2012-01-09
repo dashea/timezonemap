@@ -48,6 +48,9 @@ dist_ui_DATA = \
 tzdatadir = $(pkgdatadir)/
 dist_tzdata_DATA = backward
 
+pkgconfigdir = $(libdir)/pkgconfig
+dist_pkgconfig_DATA = timezonemap.pc
+
 AM_CPPFLAGS =						\
 	$(LIBTIMEZONEMAP_CFLAGS)				\
 	-DGNOMELOCALEDIR="\"$(datadir)/locale\""	\
@@ -73,6 +76,14 @@ libtimezonemap_la_SOURCES =	\
 	cc-timezone-map.c	\
 	cc-timezone-map.h	\
 	tz.c tz.h
+
+# Specify 'timezonemap' twice: once for package (so we could eventually add
+# a timezonemap-gtk4 for example), and once for namespacing inside code so
+# that users do "#include <timezonemap/tz.h>" instead of "#include <tz.h>"
+timezonemapincludesdir = $(includedir)/timezonemap/timezonemap
+timezonemapincludes_HEADERS = \
+  cc-timezone-map.h \
+  tz.h
 
 libtimezonemap_la_LIBADD = $(LIBTIMEZONEMAP_LIBS) -lm
 libtimezonemap_la_LDFLAGS = \
