@@ -1,3 +1,10 @@
+libtimezonemap (0.3.1) precise; urgency=low
+
+  * Ship m4/ directory, which accidentally got dropped when making the
+    tarball for 0.3.  Fixes FTBFS 
+
+ -- Michael Terry <mterry@ubuntu.com>  Mon, 09 Jan 2012 15:53:35 +0100
+
 libtimezonemap (0.3) precise; urgency=low
 
   * Fix crash when freeing CcTimezoneLocation objects
