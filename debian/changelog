@@ -4,8 +4,9 @@ libtimezonemap (0.3) precise; urgency=low
   * Ship a .pc file
   * Ship include headers
   * Move .gir file from gir1.2-* package to *-dev package
+  * Add CcTimezoneCompletion from indicator-datetime
 
- -- Michael Terry <mterry@ubuntu.com>  Mon, 09 Jan 2012 12:06:39 +0000
+ -- Michael Terry <mterry@ubuntu.com>  Mon, 09 Jan 2012 12:58:29 +0000
 
 libtimezonemap (0.2.1) precise; urgency=low
 

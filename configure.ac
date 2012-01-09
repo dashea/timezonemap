@@ -52,7 +52,8 @@ GTK3_REQUIRED_VERSION=3.1.4
 GIO_REQUIRED_VERSION=2.5.11
 
 PKG_CHECK_MODULES(LIBTIMEZONEMAP, gio-2.0 >= $GIO_REQUIRED_VERSION
-                                  gtk+-3.0 >= $GTK3_REQUIRED_VERSION)
+                                  gtk+-3.0 >= $GTK3_REQUIRED_VERSION
+                                  json-glib-1.0)
 
 GOBJECT_INTROSPECTION_CHECK([0.6.7])
 

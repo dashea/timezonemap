@@ -75,6 +75,8 @@ lib_LTLIBRARIES = libtimezonemap.la
 libtimezonemap_la_SOURCES =	\
 	cc-timezone-map.c	\
 	cc-timezone-map.h	\
+	timezone-completion.c	\
+	timezone-completion.h	\
 	tz.c tz.h
 
 # Specify 'timezonemap' twice: once for package (so we could eventually add
@@ -83,6 +85,7 @@ libtimezonemap_la_SOURCES =	\
 timezonemapincludesdir = $(includedir)/timezonemap/timezonemap
 timezonemapincludes_HEADERS = \
   cc-timezone-map.h \
+  timezone-completion.h \
   tz.h
 
 libtimezonemap_la_LIBADD = $(LIBTIMEZONEMAP_LIBS) -lm
@@ -101,7 +104,7 @@ INTROSPECTION_GIRS = TimezoneMap-1.0.gir
 introspection_sources = $(libtimezonemap_la_SOURCES)
 
 TimezoneMap-1.0.gir: libtimezonemap.la
-TimezoneMap_1_0_gir_INCLUDES = GObject-2.0 Gtk-3.0
+TimezoneMap_1_0_gir_INCLUDES = GObject-2.0 Gtk-3.0 Json-1.0
 TimezoneMap_1_0_gir_CFLAGS = $(INCLUDES) --identifier-prefix=Cc
 TimezoneMap_1_0_gir_LIBS = libtimezonemap.la
 TimezoneMap_1_0_gir_FILES = $(introspection_sources)
