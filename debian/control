@@ -12,6 +12,7 @@ Build-Depends: cdbs,
                libglib2.0-dev (>= 2.25.0),
                libgtk-3-dev (>= 3.1.4),
                libcairo2-dev (>= 1.10),
+               libjson-glib-dev,
                dh-autoreconf
 Standards-Version: 3.9.2
 Vcs-Bzr: http://bazaar.launchpad.net/~timezonemap-team/timezonemap/trunk
