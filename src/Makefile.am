@@ -58,7 +58,7 @@ AM_CPPFLAGS =						\
 noinst_PROGRAMS = test-timezone
 
 test_timezone_SOURCES = test-timezone.c tz.c tz.h
-test_timezone_LDADD = $(LIBTIMEZONEMAP_LIBS)
+test_timezone_LDADD = $(LIBTIMEZONEMAP_LIBS) -lm
 test_timezone_CFLAGS = $(LIBTIMEZONEMAP_CFLAGS)
 
 all-local: check-local
@@ -74,7 +74,7 @@ libtimezonemap_la_SOURCES =	\
 	cc-timezone-map.h	\
 	tz.c tz.h
 
-libtimezonemap_la_LIBADD = $(LIBTIMEZONEMAP_LIBS)
+libtimezonemap_la_LIBADD = $(LIBTIMEZONEMAP_LIBS) -lm
 libtimezonemap_la_LDFLAGS = \
 	-version-info 1:0:0 \
 	-no-undefined \
