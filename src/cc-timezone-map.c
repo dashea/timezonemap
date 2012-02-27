@@ -65,6 +65,10 @@ struct _CcTimezoneMapPrivate
   TzDB *tzdb;
   CcTimezoneLocation *location;
   GHashTable *alias_db;
+  GList *distances;
+
+  gint previous_x;
+  gint previous_y;
 };
 
 enum
@@ -575,6 +579,11 @@ cc_timezone_map_dispose (GObject *object)
       g_hash_table_destroy (priv->alias_db);
       priv->alias_db = NULL;
     }
+  if (priv->distances)
+    {
+      g_list_free (priv->distances);
+      priv->distances = NULL;
+    }
 
   if (priv->watermark)
     {
@@ -922,8 +931,8 @@ get_loc_for_xy (GtkWidget * widget, gint x, gint y)
 
   const GPtrArray *array;
   gint width, height;
-  GList *distances = NULL;
   GtkAllocation alloc;
+  CcTimezoneLocation* location;
 
   GValue glon = {0};
   GValue glat = {0};
@@ -941,6 +950,11 @@ get_loc_for_xy (GtkWidget * widget, gint x, gint y)
   a = pixels[(rowstride * y + x * 4) + 3];
 
 
+  if ((x - priv->previous_x < 5 && x - priv->previous_x > -5) &&
+      (y - priv->previous_y < 5 && y - priv->previous_y > -5)) {
+    x = priv->previous_x;
+    y = priv->previous_y;
+  }
   for (i = 0; color_codes[i].offset != -100; i++)
     {
        if (color_codes[i].red == r && color_codes[i].green == g
@@ -960,33 +974,40 @@ get_loc_for_xy (GtkWidget * widget, gint x, gint y)
   width = alloc.width;
   height = alloc.height;
 
-  for (i = 0; i < array->len; i++)
-    {
-      gdouble pointx, pointy, dx, dy;
-      CcTimezoneLocation *loc = array->pdata[i];
+  if (x == priv->previous_x && y == priv->previous_y) {
+    priv->distances = g_list_next (priv->distances);
+    location = (CcTimezoneLocation*) priv->distances->data;
+  } else {
+    g_list_free (priv->distances);
+    priv->distances = NULL;
+    for (i = 0; i < array->len; i++)
+      {
+        gdouble pointx, pointy, dx, dy;
+        CcTimezoneLocation *loc = array->pdata[i];
 
-      g_object_get_property(G_OBJECT (loc), "longitude", &glon);
-      g_object_get_property(G_OBJECT (loc), "latitude", &glat);
-      pointx = convert_longtitude_to_x (g_value_get_double(&glon), width);
-      pointy = convert_latitude_to_y (g_value_get_double(&glat), height);
+        g_object_get_property(G_OBJECT (loc), "longitude", &glon);
+        g_object_get_property(G_OBJECT (loc), "latitude", &glat);
+        pointx = convert_longtitude_to_x (g_value_get_double(&glon), width);
+        pointy = convert_latitude_to_y (g_value_get_double(&glat), height);
 
-      dx = pointx - x;
-      dy = pointy - y;
+        dx = pointx - x;
+        dy = pointy - y;
 
-      g_value_set_double(&gdist, (gdouble) dx * dx + dy * dy);
-      g_object_set_property(G_OBJECT (loc), "dist", &gdist);
-      distances = g_list_prepend (distances, loc);
-    }
-  distances = g_list_sort (distances, (GCompareFunc) sort_locations);
-
-  CcTimezoneLocation * loc = (CcTimezoneLocation*) distances->data;
+        g_value_set_double(&gdist, (gdouble) dx * dx + dy * dy);
+        g_object_set_property(G_OBJECT (loc), "dist", &gdist);
+        priv->distances = g_list_prepend (priv->distances, loc);
+      }
+    priv->distances = g_list_sort (priv->distances, (GCompareFunc) sort_locations);
+    location = (CcTimezoneLocation*) priv->distances->data;
+    priv->previous_x = x;
+    priv->previous_y = y;
+  }
 
   g_value_unset (&glon);
   g_value_unset (&glat);
   g_value_unset (&gdist);
-  g_list_free (distances);
 
-  return loc;
+  return location;
 }
 
 static gboolean
@@ -1063,6 +1084,9 @@ cc_timezone_map_init (CcTimezoneMap *self)
   GError *err = NULL;
 
   priv = self->priv = TIMEZONE_MAP_PRIVATE (self);
+
+  priv->previous_x = -1;
+  priv->previous_y = -1;
 
   priv->orig_background = gdk_pixbuf_new_from_file (DATADIR "/bg.png",
                                                     &err);
