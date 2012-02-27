@@ -1,10 +1,10 @@
-libtimezonemap (0.3.2) UNRELEASED; urgency=low
+libtimezonemap (0.3.2) precise; urgency=low
 
   * Use AC_CHECK_LIBM. Thanks Loic Minier!
   * Cycle through timezones on mouse clicks within a 10 pixel square box
     of the previous click (LP: #905754).
 
- -- Evan Dandrea <ev@ubuntu.com>  Mon, 27 Feb 2012 19:11:50 +0000
+ -- Evan Dandrea <ev@ubuntu.com>  Mon, 27 Feb 2012 19:13:49 +0000
 
 libtimezonemap (0.3.1) precise; urgency=low
 
