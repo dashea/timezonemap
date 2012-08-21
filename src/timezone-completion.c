@@ -532,25 +532,18 @@ get_initial_model (void)
 
     gchar * zone;
     gchar * country;
-    g_object_get (loc, "zone", &zone, "country", &country, NULL);
-
-    /* FIXME: need something better than below for non-English locales */
-    const gchar * last_bit = ((const gchar *)strrchr (zone, '/')) + 1;
-    if (last_bit == NULL)
-      last_bit = zone;
-    gchar * name = g_strdup (last_bit);
-    gchar * underscore;
-    while ((underscore = strchr (name, '_'))) {
-       *underscore = ' ';
-    }
+    gchar * en_name; // FIXME: need something better for non-English locales 
+    g_object_get (loc, "zone", &zone, "country", &country, "en_name", &en_name,
+                  NULL);
 
     gtk_list_store_set (store, &iter,
                         CC_TIMEZONE_COMPLETION_ZONE, zone,
-                        CC_TIMEZONE_COMPLETION_NAME, name,
+                        CC_TIMEZONE_COMPLETION_NAME, en_name,
                         CC_TIMEZONE_COMPLETION_COUNTRY, country,
                         -1);
 
-    g_free (name);
+    g_free (en_name);
+    g_free (country);
     g_free (zone);
   }
 

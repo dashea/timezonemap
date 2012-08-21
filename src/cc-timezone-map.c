@@ -1166,6 +1166,54 @@ cc_timezone_map_set_timezone (CcTimezoneMap *map,
 }
 
 void
+cc_timezone_map_set_location (CcTimezoneMap *map,
+                              const gchar   *location_name,
+			      gdouble lon,
+			      gdouble lat)
+{
+  GPtrArray *locations;
+  guint i;
+  GValue glon = {0};
+  GValue glat = {0};
+  GValue en_name = {0};
+  g_value_init (&glat, G_TYPE_DOUBLE);
+  g_value_init (&glon, G_TYPE_DOUBLE);
+  g_value_init (&en_name, G_TYPE_STRING);
+
+  locations = tz_get_locations (map->priv->tzdb);
+
+  for (i = 0; i < locations->len; i++)
+    {
+      CcTimezoneLocation *loc = locations->pdata[i];
+      gdouble tlon, tlat;
+      g_object_get_property(G_OBJECT (loc), "longitude", &glon);
+      g_object_get_property(G_OBJECT (loc), "latitude", &glat);
+      g_object_get_property(G_OBJECT (loc), "en_name", &en_name);
+
+      tlon = g_value_get_double(&glon);
+      tlat = g_value_get_double(&glat);
+
+      if (!g_strcmp0 (g_value_get_string(&en_name), location_name))
+	{
+	  g_warning ("Names Matched: entry coords: %f %f, loc coords: %f %f",
+		     loc, lat, tlon, tlat);
+	}
+
+      if (!g_strcmp0 (g_value_get_string(&en_name), location_name) &&
+	  lon == tlon && lat == tlat)
+        {
+          set_location (map, loc);
+          break;
+        }
+    }
+
+  gtk_widget_queue_draw (GTK_WIDGET (map));
+  g_value_unset (&glon);
+  g_value_unset (&glat);
+  g_value_unset (&en_name);
+}
+
+void
 cc_timezone_map_set_coords (CcTimezoneMap *map, gdouble lon, gdouble lat)
 {
   const gchar * zone = cc_timezone_map_get_timezone_at_coords (map, lon, lat);

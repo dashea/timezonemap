@@ -74,6 +74,9 @@ void cc_timezone_map_set_watermark (CcTimezoneMap * map,
                                     const gchar * watermark);
 void cc_timezone_map_set_timezone (CcTimezoneMap *map,
                                    const gchar   *timezone);
+void cc_timezone_map_set_location (CcTimezoneMap *map,
+				   const gchar   *location_name,
+				   gdouble lon, gdouble lat);
 void cc_timezone_map_set_coords (CcTimezoneMap *map,
                                  gdouble lon, gdouble lat);
 const gchar * cc_timezone_map_get_timezone_at_coords (CcTimezoneMap *map,

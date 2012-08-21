@@ -1,3 +1,10 @@
+libtimezonemap (0.3.2+local15000) precise; urgency=low
+
+  * Add m4 directory to prevent aclocal from complaining.
+  * Include cities with greater than 15000 people locally.
+
+ -- James M Leddy <james@neptune>  Fri, 03 Aug 2012 11:30:08 -0400
+
 libtimezonemap (0.3.2) precise; urgency=low
 
   * Use AC_CHECK_LIBM. Thanks Loic Minier!
