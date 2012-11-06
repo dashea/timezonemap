@@ -1,3 +1,10 @@
+libtimezonemap (0.3.2+local15001) precise; urgency=low
+
+  * Simplfy setting location
+  * Use latitude/longitude for local cities as well (LP: #892370)
+
+ -- James M Leddy <james@neptune>  Tue, 21 Aug 2012 17:33:52 -0400
+
 libtimezonemap (0.3.2+local15000) precise; urgency=low
 
   * Add m4 directory to prevent aclocal from complaining.
