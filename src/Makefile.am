@@ -43,7 +43,8 @@ dist_ui_DATA = \
 	data/timezone_-9.png \
 	data/timezone_9.png \
 	data/timezone_-9.5.png \
-	data/timezone_9.5.png
+	data/timezone_9.5.png \
+	data/cities15000.txt
 
 tzdatadir = $(pkgdatadir)/
 dist_tzdata_DATA = backward

@@ -1,3 +1,16 @@
+libtimezonemap (0.4.0) UNRELEASED; urgency=low
+
+  [ James M Leddy ]
+  * Simplfy setting location
+  * Use latitude/longitude for local cities as well (LP: #892370)
+  * Add m4 directory to prevent aclocal from complaining.
+  * Include cities with greater than 15000 people locally.
+
+  [ Dmitrijs Ledkovs ]
+  * Add original timezone svg map, thanks to Otto for finding it.
+
+ -- Dmitrijs Ledkovs <dmitrij.ledkov@ubuntu.com>  Wed, 27 Mar 2013 17:21:15 +0000
+
 libtimezonemap (0.3.2) precise; urgency=low
 
   * Use AC_CHECK_LIBM. Thanks Loic Minier!

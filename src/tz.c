@@ -36,7 +36,9 @@
 
 /* Forward declarations for private functions */
 
+#ifdef __sun
 static float convert_pos (gchar *pos, int digits);
+#endif
 static int compare_country_names (const void *a, const void *b);
 static void sort_locations_by_country (GPtrArray *locations);
 static gchar * tz_data_file_get (void);
@@ -49,6 +51,7 @@ G_DEFINE_TYPE (CcTimezoneLocation, cc_timezone_location, G_TYPE_OBJECT)
 struct _CcTimezoneLocationPrivate
 {
 	gchar *country;
+	gchar *en_name;
 	gdouble latitude;
 	gdouble longitude;
 	gchar *zone;
@@ -60,11 +63,12 @@ struct _CcTimezoneLocationPrivate
 enum {
   PROP_0,
   PROP_COUNTRY,
+  PROP_EN_NAME,
   PROP_LATITUDE,
   PROP_LONGITUDE,
   PROP_ZONE,
   PROP_COMMENT,
-  PROP_DIST
+  PROP_DIST,
 };
 
 static void
@@ -78,6 +82,9 @@ cc_timezone_location_get_property (GObject    *object,
     {
     case PROP_COUNTRY:
       g_value_set_string (value, priv->country);
+      break;
+    case PROP_EN_NAME:
+      g_value_set_string (value, priv->en_name);
       break;
     case PROP_LATITUDE:
       g_value_set_double (value, priv->latitude);
@@ -110,6 +117,9 @@ cc_timezone_location_set_property (GObject      *object,
     {
     case PROP_COUNTRY:
       priv->country = g_value_get_string(value);
+      break;
+    case PROP_EN_NAME:
+      priv->en_name = g_value_get_string(value);
       break;
     case PROP_LATITUDE:
       priv->latitude = g_value_get_double(value);
@@ -181,6 +191,13 @@ cc_timezone_location_class_init (CcTimezoneLocationClass *klass)
                                           "Country",
                                           "The country for the location",
                                           "",
+                                          G_PARAM_READWRITE));
+  g_object_class_install_property(object_class,
+                                  PROP_EN_NAME,
+                                  g_param_spec_string ("en_name",
+                                          "English Name",
+                                          "The name of the location",
+					  "",
                                           G_PARAM_READWRITE));
   g_object_class_install_property(object_class,
                                   PROP_LATITUDE,
@@ -267,27 +284,29 @@ tz_load_db (void)
 	while (fgets (buf, sizeof(buf), tzfile))
 	{
 		gchar **tmpstrarr;
-		gchar *latstr, *lngstr, *p;
 		CcTimezoneLocation *loc;
 
 		if (*buf == '#') continue;
 
 		g_strchomp(buf);
-		tmpstrarr = g_strsplit(buf,"\t", 6);
+		tmpstrarr = g_strsplit(buf,"\t", 19);
 		
+		loc = cc_timezone_location_new ();
+		loc->priv->country = g_strdup (tmpstrarr[8]);
+		loc->priv->en_name = g_strdup (tmpstrarr[2]);
+		loc->priv->zone = g_strdup (tmpstrarr[17]);
+		loc->priv->latitude  = g_ascii_strtod(tmpstrarr[4], NULL);
+		loc->priv->longitude = g_ascii_strtod(tmpstrarr[5], NULL);
+		
+#ifdef __sun
+		gchar *latstr, *lngstr, *p;
+
 		latstr = g_strdup (tmpstrarr[1]);
 		p = latstr + 1;
 		while (*p != '-' && *p != '+') p++;
 		lngstr = g_strdup (p);
 		*p = '\0';
 		
-		loc = cc_timezone_location_new ();
-		loc->priv->country = g_strdup (tmpstrarr[0]);
-		loc->priv->zone = g_strdup (tmpstrarr[2]);
-		loc->priv->latitude  = convert_pos (latstr, 2);
-		loc->priv->longitude = convert_pos (lngstr, 3);
-		
-#ifdef __sun
 		if (tmpstrarr[3] && *tmpstrarr[3] == '-' && tmpstrarr[4])
 			loc->comment = g_strdup (tmpstrarr[4]);
 
@@ -297,6 +316,7 @@ tz_load_db (void)
 			/* duplicate entry */
 			locgrp = cc_timezone_location_new ();
 			locgrp->country = g_strdup (tmpstrarr[0]);
+			locgrp->en_name = NULL;
 			locgrp->zone = g_strdup (tmpstrarr[3]);
 			locgrp->latitude  = convert_pos (latstr, 2);
 			locgrp->longitude = convert_pos (lngstr, 3);
@@ -305,13 +325,15 @@ tz_load_db (void)
 			g_ptr_array_add (tz_db->locations, (gpointer) locgrp);
 		}
 #else
-		loc->priv->comment = (tmpstrarr[3]) ? g_strdup(tmpstrarr[3]) : NULL;
+		loc->priv->comment = NULL;
 #endif
 
 		g_ptr_array_add (tz_db->locations, (gpointer) loc);
 
+#ifdef __sun
 		g_free (latstr);
 		g_free (lngstr);
+#endif
 		g_strfreev (tmpstrarr);
 	}
 	
@@ -498,6 +520,7 @@ tz_data_file_get (void)
 	return file;
 }
 
+#ifdef __sun
 static float
 convert_pos (gchar *pos, int digits)
 {
@@ -518,6 +541,7 @@ convert_pos (gchar *pos, int digits)
 	if (t1 >= 0.0) return t1 + t2/pow (10.0, strlen(fraction));
 	else return t1 - t2/pow (10.0, strlen(fraction));
 }
+#endif
 
 static int
 compare_country_names (const void *a, const void *b)

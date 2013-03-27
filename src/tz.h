@@ -30,7 +30,7 @@
 #include <glib-object.h>
 
 #ifndef __sun
-#  define TZ_DATA_FILE "/usr/share/zoneinfo/zone.tab"
+#  define TZ_DATA_FILE "/usr/share/libtimezonemap/ui/cities15000.txt"
 #else
 #  define TZ_DATA_FILE "/usr/share/lib/zoneinfo/tab/zone_sun.tab"
 #endif

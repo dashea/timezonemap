@@ -532,25 +532,28 @@ get_initial_model (void)
 
     gchar * zone;
     gchar * country;
-    g_object_get (loc, "zone", &zone, "country", &country, NULL);
+    gchar * en_name; // FIXME: need something better for non-English locales 
+    gdouble longitude;
+    gdouble latitude;
+    g_object_get (loc, "zone", &zone, "country", &country, "en_name", &en_name,
+                  "longitude", &longitude, "latitude", &latitude,
+                  NULL);
 
-    /* FIXME: need something better than below for non-English locales */
-    const gchar * last_bit = ((const gchar *)strrchr (zone, '/')) + 1;
-    if (last_bit == NULL)
-      last_bit = zone;
-    gchar * name = g_strdup (last_bit);
-    gchar * underscore;
-    while ((underscore = strchr (name, '_'))) {
-       *underscore = ' ';
-    }
+    gchar * longitude_s = g_strdup_printf ("%f", longitude);
+    gchar * latitude_s=  g_strdup_printf ("%f", latitude);
 
     gtk_list_store_set (store, &iter,
-                        CC_TIMEZONE_COMPLETION_ZONE, zone,
-                        CC_TIMEZONE_COMPLETION_NAME, name,
+                        CC_TIMEZONE_COMPLETION_ZONE, NULL,
+                        CC_TIMEZONE_COMPLETION_NAME, en_name,
                         CC_TIMEZONE_COMPLETION_COUNTRY, country,
+                        CC_TIMEZONE_COMPLETION_LONGITUDE, longitude_s,
+                        CC_TIMEZONE_COMPLETION_LATITUDE, latitude_s,
                         -1);
 
-    g_free (name);
+    g_free (latitude_s);
+    g_free (longitude_s);
+    g_free (en_name);
+    g_free (country);
     g_free (zone);
   }
 

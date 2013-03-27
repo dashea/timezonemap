@@ -1166,6 +1166,19 @@ cc_timezone_map_set_timezone (CcTimezoneMap *map,
 }
 
 void
+cc_timezone_map_set_location (CcTimezoneMap *map,
+			      gdouble lon,
+			      gdouble lat)
+{
+  GtkAllocation alloc;
+  gtk_widget_get_allocation (GTK_WIDGET(map), &alloc);
+  gdouble x = convert_longtitude_to_x(lon, alloc.width);
+  gdouble y = convert_latitude_to_y(lat, alloc.height);
+  CcTimezoneLocation * loc = get_loc_for_xy (GTK_WIDGET(map), x, y);
+  set_location (map, loc);
+}
+
+void
 cc_timezone_map_set_coords (CcTimezoneMap *map, gdouble lon, gdouble lat)
 {
   const gchar * zone = cc_timezone_map_get_timezone_at_coords (map, lon, lat);
