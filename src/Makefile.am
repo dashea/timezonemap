@@ -106,7 +106,8 @@ introspection_sources = $(libtimezonemap_la_SOURCES)
 
 TimezoneMap-1.0.gir: libtimezonemap.la
 TimezoneMap_1_0_gir_INCLUDES = GObject-2.0 Gtk-3.0 Json-1.0
-TimezoneMap_1_0_gir_CFLAGS = $(INCLUDES) --identifier-prefix=Cc
+TimezoneMap_1_0_gir_CFLAGS = $(INCLUDES)
+TimezoneMap_1_0_gir_SCANNERFLAGS = --identifier-prefix=Cc
 TimezoneMap_1_0_gir_LIBS = libtimezonemap.la
 TimezoneMap_1_0_gir_FILES = $(introspection_sources)
 

@@ -8,6 +8,8 @@ libtimezonemap (0.4.0) UNRELEASED; urgency=low
 
   [ Dmitrijs Ledkovs ]
   * Add original timezone svg map, thanks to Otto for finding it.
+  * Bump standards version to 3.9.4.
+  * Fix gir scanner options.
 
  -- Dmitrijs Ledkovs <dmitrij.ledkov@ubuntu.com>  Wed, 27 Mar 2013 17:21:15 +0000
 
