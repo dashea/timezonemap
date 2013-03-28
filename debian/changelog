@@ -1,4 +1,4 @@
-libtimezonemap (0.4.0) UNRELEASED; urgency=low
+libtimezonemap (0.4.0) raring; urgency=low
 
   [ James M Leddy ]
   * Simplfy setting location
@@ -11,7 +11,7 @@ libtimezonemap (0.4.0) UNRELEASED; urgency=low
   * Bump standards version to 3.9.4.
   * Fix gir scanner options.
 
- -- Dmitrijs Ledkovs <dmitrij.ledkov@ubuntu.com>  Wed, 27 Mar 2013 17:21:15 +0000
+ -- Dmitrijs Ledkovs <dmitrij.ledkov@ubuntu.com>  Thu, 28 Mar 2013 11:23:23 +0000
 
 libtimezonemap (0.3.2) precise; urgency=low
 
