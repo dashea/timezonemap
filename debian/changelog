@@ -1,8 +1,8 @@
-libtimezonemap (0.4.0.1) UNRELEASED; urgency=low
+libtimezonemap (0.4.0.1) saucy; urgency=low
 
   * Add Depends from the -dev package to packages the .pcfile Requires.
 
- -- Iain Lane <iain.lane@canonical.com>  Tue, 23 Jul 2013 17:14:59 +0100
+ -- Iain Lane <iain.lane@canonical.com>  Tue, 23 Jul 2013 17:42:07 +0100
 
 libtimezonemap (0.4.0) raring; urgency=low
 
