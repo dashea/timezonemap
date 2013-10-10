@@ -515,7 +515,14 @@ tz_data_file_get (void)
 {
 	gchar *file;
 
-	file = g_strdup (TZ_DATA_FILE);
+	/* Allow passing this in at runtime, to support loading it from the build
+	* tree during tests. */
+	file = g_getenv ("TZ_DATA_FILE");
+
+	if (file)
+		file = g_strdup (file);
+	else
+		file = g_strdup (TZ_DATA_FILE);
 
 	return file;
 }

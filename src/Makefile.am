@@ -69,7 +69,7 @@ all-local: check-local
 
 # FIXME remove "|| :" when we have all the necessary pixmaps
 check-local: test-timezone
-	$(builddir)/test-timezone $(srcdir)/data || :
+	TZ_DATA_FILE=$(srcdir)/data/cities15000.txt $(builddir)/test-timezone $(srcdir)/data || :
 
 lib_LTLIBRARIES = libtimezonemap.la
 
