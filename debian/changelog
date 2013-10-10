@@ -1,9 +1,9 @@
-libtimezonemap (0.4.0.2) UNRELEASED; urgency=low
+libtimezonemap (0.4.0.2) saucy; urgency=low
 
   * Allow using the tz data file from the build tree. Fixes amd64
     builds.
 
- -- Evan Dandrea <ev@ubuntu.com>  Thu, 10 Oct 2013 15:18:42 +0100
+ -- Evan Dandrea <ev@ubuntu.com>  Thu, 10 Oct 2013 15:19:03 +0100
 
 libtimezonemap (0.4.0.1) saucy; urgency=low
 
