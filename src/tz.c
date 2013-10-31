@@ -41,7 +41,7 @@ static float convert_pos (gchar *pos, int digits);
 #endif
 static int compare_country_names (const void *a, const void *b);
 static void sort_locations_by_country (GPtrArray *locations);
-static gchar * tz_data_file_get (void);
+static gchar * tz_data_file_get (gchar *env, gchar *defaultfile);
 
 G_DEFINE_TYPE (CcTimezoneLocation, cc_timezone_location, G_TYPE_OBJECT)
 
@@ -52,6 +52,7 @@ struct _CcTimezoneLocationPrivate
 {
 	gchar *country;
 	gchar *en_name;
+    gchar *state;
 	gdouble latitude;
 	gdouble longitude;
 	gchar *zone;
@@ -64,6 +65,7 @@ enum {
   PROP_0,
   PROP_COUNTRY,
   PROP_EN_NAME,
+  PROP_STATE,
   PROP_LATITUDE,
   PROP_LONGITUDE,
   PROP_ZONE,
@@ -85,6 +87,9 @@ cc_timezone_location_get_property (GObject    *object,
       break;
     case PROP_EN_NAME:
       g_value_set_string (value, priv->en_name);
+      break;
+    case PROP_STATE:
+      g_value_set_string (value, priv->state);
       break;
     case PROP_LATITUDE:
       g_value_set_double (value, priv->latitude);
@@ -120,6 +125,9 @@ cc_timezone_location_set_property (GObject      *object,
       break;
     case PROP_EN_NAME:
       priv->en_name = g_value_get_string(value);
+      break;
+    case PROP_STATE:
+      priv->state = g_value_get_string(value);
       break;
     case PROP_LATITUDE:
       priv->latitude = g_value_get_double(value);
@@ -197,7 +205,14 @@ cc_timezone_location_class_init (CcTimezoneLocationClass *klass)
                                   g_param_spec_string ("en_name",
                                           "English Name",
                                           "The name of the location",
-					  "",
+                                          "",
+                                          G_PARAM_READWRITE));
+  g_object_class_install_property(object_class,
+                                  PROP_STATE,
+                                  g_param_spec_string ("state",
+                                          "State",
+                                          "The state for the location",
+                                          "",
                                           G_PARAM_READWRITE));
   g_object_class_install_property(object_class,
                                   PROP_LATITUDE,
@@ -261,12 +276,13 @@ cc_timezone_location_new (void)
 TzDB *
 tz_load_db (void)
 {
-	gchar *tz_data_file;
+	gchar *tz_data_file, *admin1_file;
 	TzDB *tz_db;
 	FILE *tzfile;
+    FILE *admin1file;
 	char buf[4096];
 
-	tz_data_file = tz_data_file_get ();
+    tz_data_file = tz_data_file_get ("TZ_DATA_FILE", TZ_DATA_FILE);
 	if (!tz_data_file) {
 		g_warning ("Could not get the TimeZone data file name");
 		return NULL;
@@ -277,6 +293,35 @@ tz_load_db (void)
 		g_free (tz_data_file);
 		return NULL;
 	}
+
+    admin1_file = tz_data_file_get ("ADMIN1_FILE", ADMIN1_FILE);
+    if (!admin1_file) {
+        g_warning ("Could not get the admin1 data file name");
+        return NULL;
+    }
+    admin1file = fopen (admin1_file, "r");
+    if (!admin1file) {
+		g_warning ("Could not open *%s*\n", admin1_file);
+        g_free (admin1_file);
+    }
+
+    GHashTable *countryHash = g_hash_table_new (g_str_hash,
+            g_str_equal);
+
+    while (fgets (buf, sizeof(buf), admin1file))
+    {
+        gchar **tmpstrarr;
+		if (*buf == '#') continue;
+
+		g_strchomp (buf);
+		tmpstrarr = g_strsplit (buf,"\t", 4);
+
+        g_hash_table_insert (countryHash,
+                g_strdup (tmpstrarr[0]),
+                g_strdup (tmpstrarr[1]));
+
+        g_strfreev (tmpstrarr);
+    }
 
 	tz_db = g_new0 (TzDB, 1);
 	tz_db->locations = g_ptr_array_new ();
@@ -290,10 +335,18 @@ tz_load_db (void)
 
 		g_strchomp(buf);
 		tmpstrarr = g_strsplit(buf,"\t", 19);
+
 		
 		loc = cc_timezone_location_new ();
 		loc->priv->country = g_strdup (tmpstrarr[8]);
 		loc->priv->en_name = g_strdup (tmpstrarr[2]);
+
+        gchar * tmpState = g_strdup_printf ("%s.%s", loc->priv->country,
+                tmpstrarr[10]);
+        loc->priv->state = (gchar *) g_hash_table_lookup (countryHash, tmpState);
+        g_printf("%s %s\n", tmpState, loc->priv->state);
+        g_free (tmpState);
+
 		loc->priv->zone = g_strdup (tmpstrarr[17]);
 		loc->priv->latitude  = g_ascii_strtod(tmpstrarr[4], NULL);
 		loc->priv->longitude = g_ascii_strtod(tmpstrarr[5], NULL);
@@ -343,6 +396,7 @@ tz_load_db (void)
 	sort_locations_by_country (tz_db->locations);
 	
 	g_free (tz_data_file);
+    g_hash_table_unref (countryHash);
 	
 	return tz_db;
 }    
@@ -511,20 +565,13 @@ tz_info_free (TzInfo *tzinfo)
  * ----------------- */
 
 static gchar *
-tz_data_file_get (void)
+tz_data_file_get (gchar *env, gchar *defaultfile)
 {
-	gchar *file;
-
 	/* Allow passing this in at runtime, to support loading it from the build
 	* tree during tests. */
-	file = g_getenv ("TZ_DATA_FILE");
+    const gchar * filename = g_getenv (env);
 
-	if (file)
-		file = g_strdup (file);
-	else
-		file = g_strdup (TZ_DATA_FILE);
-
-	return file;
+	return filename ? g_strdup (filename) : g_strdup (defaultfile);
 }
 
 #ifdef __sun

@@ -35,6 +35,8 @@
 #  define TZ_DATA_FILE "/usr/share/lib/zoneinfo/tab/zone_sun.tab"
 #endif
 
+# define ADMIN1_FILE "/usr/share/libtimezonemap/ui/admin1Codes.txt"
+
 G_BEGIN_DECLS
 
 #define CC_TYPE_TIMEZONE_LOCATION cc_timezone_location_get_type()
