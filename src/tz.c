@@ -51,6 +51,7 @@ G_DEFINE_TYPE (CcTimezoneLocation, cc_timezone_location, G_TYPE_OBJECT)
 struct _CcTimezoneLocationPrivate
 {
 	gchar *country;
+    gchar *full_country;
 	gchar *en_name;
     gchar *state;
 	gdouble latitude;
@@ -64,6 +65,7 @@ struct _CcTimezoneLocationPrivate
 enum {
   PROP_0,
   PROP_COUNTRY,
+  PROP_FULL_COUNTRY,
   PROP_EN_NAME,
   PROP_STATE,
   PROP_LATITUDE,
@@ -84,6 +86,9 @@ cc_timezone_location_get_property (GObject    *object,
     {
     case PROP_COUNTRY:
       g_value_set_string (value, priv->country);
+      break;
+    case PROP_FULL_COUNTRY:
+      g_value_set_string (value, priv->full_country);
       break;
     case PROP_EN_NAME:
       g_value_set_string (value, priv->en_name);
@@ -123,6 +128,9 @@ cc_timezone_location_set_property (GObject      *object,
     case PROP_COUNTRY:
       priv->country = g_value_get_string(value);
       break;
+    case PROP_FULL_COUNTRY:
+      priv->full_country = g_value_get_string(value);
+      break;
     case PROP_EN_NAME:
       priv->en_name = g_value_get_string(value);
       break;
@@ -158,6 +166,12 @@ cc_timezone_location_dispose (GObject *object)
     {
       g_free (priv->country);
       priv->country = NULL;
+    }
+
+  if (priv->full_country)
+    {
+      g_free (priv->full_country);
+      priv->full_country = NULL;
     }
 
   if (priv->zone)
@@ -198,6 +212,13 @@ cc_timezone_location_class_init (CcTimezoneLocationClass *klass)
                                   g_param_spec_string ("country",
                                           "Country",
                                           "The country for the location",
+                                          "",
+                                          G_PARAM_READWRITE));
+  g_object_class_install_property(object_class,
+                                  PROP_FULL_COUNTRY,
+                                  g_param_spec_string ("full_country",
+                                          "Country (full name)",
+                                          "The full country name",
                                           "",
                                           G_PARAM_READWRITE));
   g_object_class_install_property(object_class,
@@ -308,18 +329,33 @@ void parse_admin1Codes (gpointer parsed_data,
 
 }
 
-typedef struct Pair {
+void parse_countrycode (gpointer parsed_data,
+                        gpointer user_data)
+{
+    gchar ** parsed_data_v = (gchar **) parsed_data;
+    GHashTable * hash_table = (GHashTable *) user_data;
+
+    g_hash_table_insert (hash_table,
+                         g_strdup (parsed_data_v[0]),
+                         g_strdup (parsed_data_v[4]));
+
+    g_strfreev (parsed_data_v);
+}
+
+typedef struct Triple {
     gpointer first;
     gpointer second;
-} Pair;
+    gpointer third;
+} Triple;
 
 void parse_cities15000 (gpointer parsed_data, 
                         gpointer user_data)
 {
     gchar ** parsed_data_v = (gchar **) parsed_data;
-    Pair * pair = (Pair *) user_data;
-    GPtrArray * ptr_array = (GPtrArray *) pair->first;
-    GHashTable * countryHash = (GHashTable *) pair->second;
+    Triple * triple = (Triple *) user_data;
+    GPtrArray * ptr_array = (GPtrArray *) triple->first;
+    GHashTable * stateHash = (GHashTable *) triple->second;
+    GHashTable * countryHash = (GHashTable *) triple->third;
 
     CcTimezoneLocation *loc = cc_timezone_location_new ();
 
@@ -328,9 +364,16 @@ void parse_cities15000 (gpointer parsed_data,
 
     gchar * tmpState = g_strdup_printf ("%s.%s", loc->priv->country,
             parsed_data_v[10]);
-    loc->priv->state = (gchar *) g_hash_table_lookup (
-            countryHash, tmpState);
+    loc->priv->state = g_strdup (
+            (gchar *) g_hash_table_lookup (
+                stateHash,
+                tmpState));
     g_free (tmpState);
+
+    loc->priv->full_country = g_strdup (
+            (gchar *) g_hash_table_lookup (
+                countryHash,
+                loc->priv->country));
 
     loc->priv->zone = g_strdup (parsed_data_v[17]);
     loc->priv->latitude  = g_ascii_strtod(parsed_data_v[4], NULL);
@@ -384,21 +427,13 @@ void parse_cities15000 (gpointer parsed_data,
 TzDB *
 tz_load_db (void)
 {
-	gchar *tz_data_file, *admin1_file;
+	gchar *tz_data_file, *admin1_file, *country_file;
 	TzDB *tz_db;
-	FILE *tzfile;
-    FILE *admin1file;
 	char buf[4096];
 
     tz_data_file = tz_data_file_get ("TZ_DATA_FILE", TZ_DATA_FILE);
 	if (!tz_data_file) {
 		g_warning ("Could not get the TimeZone data file name");
-		return NULL;
-	}
-	tzfile = fopen (tz_data_file, "r");
-	if (!tzfile) {
-		g_warning ("Could not open *%s*\n", tz_data_file);
-		g_free (tz_data_file);
 		return NULL;
 	}
 
@@ -408,19 +443,36 @@ tz_load_db (void)
         return NULL;
     }
 
-    GHashTable *countryHash = g_hash_table_new (g_str_hash,
-            g_str_equal);
+    country_file = tz_data_file_get ("COUNTRY_FILE", COUNTRY_FILE);
+    if (!country_file) {
+        g_warning ("Could not get the country data file name");
+        return NULL;
+    }
 
-    parse_file (admin1_file, 4, parse_admin1Codes, countryHash);
+    GHashTable *stateHash = g_hash_table_new_full (g_str_hash,
+            g_str_equal, g_free, g_free);
+
+    parse_file (admin1_file, 4, parse_admin1Codes, stateHash);
+
+    GHashTable * countryHash = g_hash_table_new_full (g_str_hash,
+            g_str_equal, g_free, g_free);
+
+    parse_file (country_file, 19, parse_countrycode, countryHash);
 
 	tz_db = g_new0 (TzDB, 1);
 	tz_db->locations = g_ptr_array_new ();
 
-    Pair * pair = g_new (Pair, 1);
-    pair->first = tz_db->locations;
-    pair->second = countryHash;
+    Triple * triple = g_new (Triple, 1);
+    triple->first = tz_db->locations;
+    triple->second = stateHash;
+    triple->third = countryHash;
 
-    parse_file (tz_data_file, 19, parse_cities15000, pair);
+    parse_file (tz_data_file, 19, parse_cities15000, triple);
+
+    g_hash_table_destroy (stateHash);
+    g_hash_table_destroy (countryHash);
+    triple->second = NULL;
+    triple->third = NULL;
 
 	/* now sort by country */
 	sort_locations_by_country (tz_db->locations);
