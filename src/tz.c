@@ -269,6 +269,114 @@ cc_timezone_location_new (void)
   return g_object_new (CC_TYPE_TIMEZONE_LOCATION, NULL);
 }
 
+void parse_file (const char * filename,
+                 const guint ncolumns,
+                 GFunc func,
+                 gpointer user_data)
+{
+	FILE *fh = fopen (filename, "r");
+    char buf[4096];
+
+	if (!fh) {
+		g_warning ("Could not open *%s*\n", filename);
+        fclose (fh);
+		return;
+	}
+
+    while (fgets (buf, sizeof(buf), fh))
+    {
+		if (*buf == '#') continue;
+
+		g_strchomp (buf);
+		func (g_strsplit (buf,"\t", ncolumns), user_data);
+    }
+
+    fclose (fh);
+}
+
+void parse_admin1Codes (gpointer parsed_data,
+                        gpointer user_data)
+{
+    gchar ** parsed_data_v = (gchar **) parsed_data;
+    GHashTable * hash_table = (GHashTable *) user_data;
+
+    g_hash_table_insert (hash_table,
+                         g_strdup (parsed_data_v[0]),
+                         g_strdup (parsed_data_v[1]));
+
+    g_strfreev (parsed_data_v);
+
+}
+
+typedef struct Pair {
+    gpointer first;
+    gpointer second;
+} Pair;
+
+void parse_cities15000 (gpointer parsed_data, 
+                        gpointer user_data)
+{
+    gchar ** parsed_data_v = (gchar **) parsed_data;
+    Pair * pair = (Pair *) user_data;
+    GPtrArray * ptr_array = (GPtrArray *) pair->first;
+    GHashTable * countryHash = (GHashTable *) pair->second;
+
+    CcTimezoneLocation *loc = cc_timezone_location_new ();
+
+    loc->priv->country = g_strdup (parsed_data_v[8]);
+    loc->priv->en_name = g_strdup (parsed_data_v[2]);
+
+    gchar * tmpState = g_strdup_printf ("%s.%s", loc->priv->country,
+            parsed_data_v[10]);
+    loc->priv->state = (gchar *) g_hash_table_lookup (
+            countryHash, tmpState);
+    g_free (tmpState);
+
+    loc->priv->zone = g_strdup (parsed_data_v[17]);
+    loc->priv->latitude  = g_ascii_strtod(parsed_data_v[4], NULL);
+    loc->priv->longitude = g_ascii_strtod(parsed_data_v[5], NULL);
+    
+#ifdef __sun
+    gchar *latstr, *lngstr, *p;
+
+    latstr = g_strdup (parsed_data_v[1]);
+    p = latstr + 1;
+    while (*p != '-' && *p != '+') p++;
+    lngstr = g_strdup (p);
+    *p = '\0';
+    
+    if (parsed_data_v[3] && *parsed_data_v[3] == '-' && parsed_data_v[4])
+        loc->comment = g_strdup (parsed_data_v[4]);
+
+    if (parsed_data_v[3] && *parsed_data_v[3] != '-' && !islower(loc->zone)) {
+        CcTimezoneLocation *locgrp;
+
+        /* duplicate entry */
+        locgrp = cc_timezone_location_new ();
+        locgrp->country = g_strdup (parsed_data_v[0]);
+        locgrp->en_name = NULL;
+        locgrp->zone = g_strdup (parsed_data_v[3]);
+        locgrp->latitude  = convert_pos (latstr, 2);
+        locgrp->longitude = convert_pos (lngstr, 3);
+        locgrp->comment = (parsed_data_v[4]) ? g_strdup (parsed_data_v[4]) : NULL;
+
+        g_ptr_array_add (ptr_array, (gpointer) locgrp);
+    }
+#else
+    loc->priv->comment = NULL;
+#endif
+
+    g_ptr_array_add (ptr_array, (gpointer) loc);
+
+#ifdef __sun
+    g_free (latstr);
+    g_free (lngstr);
+#endif
+    g_strfreev (parsed_data_v);
+
+    return;
+}
+
 
 /* ---------------- *
  * Public interface *
@@ -299,99 +407,21 @@ tz_load_db (void)
         g_warning ("Could not get the admin1 data file name");
         return NULL;
     }
-    admin1file = fopen (admin1_file, "r");
-    if (!admin1file) {
-		g_warning ("Could not open *%s*\n", admin1_file);
-        g_free (admin1_file);
-    }
 
     GHashTable *countryHash = g_hash_table_new (g_str_hash,
             g_str_equal);
 
-    while (fgets (buf, sizeof(buf), admin1file))
-    {
-        gchar **tmpstrarr;
-		if (*buf == '#') continue;
-
-		g_strchomp (buf);
-		tmpstrarr = g_strsplit (buf,"\t", 4);
-
-        g_hash_table_insert (countryHash,
-                g_strdup (tmpstrarr[0]),
-                g_strdup (tmpstrarr[1]));
-
-        g_strfreev (tmpstrarr);
-    }
+    parse_file (admin1_file, 4, parse_admin1Codes, countryHash);
 
 	tz_db = g_new0 (TzDB, 1);
 	tz_db->locations = g_ptr_array_new ();
 
-	while (fgets (buf, sizeof(buf), tzfile))
-	{
-		gchar **tmpstrarr;
-		CcTimezoneLocation *loc;
+    Pair * pair = g_malloc (sizeof (Pair));
+    pair->first = tz_db->locations;
+    pair->second = countryHash;
 
-		if (*buf == '#') continue;
+    parse_file (tz_data_file, 19, parse_cities15000, pair);
 
-		g_strchomp(buf);
-		tmpstrarr = g_strsplit(buf,"\t", 19);
-
-		
-		loc = cc_timezone_location_new ();
-		loc->priv->country = g_strdup (tmpstrarr[8]);
-		loc->priv->en_name = g_strdup (tmpstrarr[2]);
-
-        gchar * tmpState = g_strdup_printf ("%s.%s", loc->priv->country,
-                tmpstrarr[10]);
-        loc->priv->state = (gchar *) g_hash_table_lookup (countryHash, tmpState);
-        g_printf("%s %s\n", tmpState, loc->priv->state);
-        g_free (tmpState);
-
-		loc->priv->zone = g_strdup (tmpstrarr[17]);
-		loc->priv->latitude  = g_ascii_strtod(tmpstrarr[4], NULL);
-		loc->priv->longitude = g_ascii_strtod(tmpstrarr[5], NULL);
-		
-#ifdef __sun
-		gchar *latstr, *lngstr, *p;
-
-		latstr = g_strdup (tmpstrarr[1]);
-		p = latstr + 1;
-		while (*p != '-' && *p != '+') p++;
-		lngstr = g_strdup (p);
-		*p = '\0';
-		
-		if (tmpstrarr[3] && *tmpstrarr[3] == '-' && tmpstrarr[4])
-			loc->comment = g_strdup (tmpstrarr[4]);
-
-		if (tmpstrarr[3] && *tmpstrarr[3] != '-' && !islower(loc->zone)) {
-			CcTimezoneLocation *locgrp;
-
-			/* duplicate entry */
-			locgrp = cc_timezone_location_new ();
-			locgrp->country = g_strdup (tmpstrarr[0]);
-			locgrp->en_name = NULL;
-			locgrp->zone = g_strdup (tmpstrarr[3]);
-			locgrp->latitude  = convert_pos (latstr, 2);
-			locgrp->longitude = convert_pos (lngstr, 3);
-			locgrp->comment = (tmpstrarr[4]) ? g_strdup (tmpstrarr[4]) : NULL;
-
-			g_ptr_array_add (tz_db->locations, (gpointer) locgrp);
-		}
-#else
-		loc->priv->comment = NULL;
-#endif
-
-		g_ptr_array_add (tz_db->locations, (gpointer) loc);
-
-#ifdef __sun
-		g_free (latstr);
-		g_free (lngstr);
-#endif
-		g_strfreev (tmpstrarr);
-	}
-	
-	fclose (tzfile);
-	
 	/* now sort by country */
 	sort_locations_by_country (tz_db->locations);
 	
