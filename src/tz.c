@@ -416,7 +416,7 @@ tz_load_db (void)
 	tz_db = g_new0 (TzDB, 1);
 	tz_db->locations = g_ptr_array_new ();
 
-    Pair * pair = g_malloc (sizeof (Pair));
+    Pair * pair = g_new (Pair, 1);
     pair->first = tz_db->locations;
     pair->second = countryHash;
 
