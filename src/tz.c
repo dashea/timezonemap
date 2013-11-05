@@ -484,7 +484,6 @@ tz_load_db (void)
     sort_locations_by_country (tz_db->locations);
 
     g_free (tz_data_file);
-    g_hash_table_unref (countryHash);
 
     return tz_db;
 }
