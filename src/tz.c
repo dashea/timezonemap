@@ -433,15 +433,15 @@ void parse_cities15000 (gpointer parsed_data,
 TzDB *
 tz_load_db (void)
 {
-	gchar *tz_data_file, *admin1_file, *country_file;
-	TzDB *tz_db;
-	char buf[4096];
+    gchar *tz_data_file, *admin1_file, *country_file;
+    TzDB *tz_db;
+    char buf[4096];
 
     tz_data_file = tz_data_file_get ("TZ_DATA_FILE", TZ_DATA_FILE);
-	if (!tz_data_file) {
-		g_warning ("Could not get the TimeZone data file name");
-		return NULL;
-	}
+    if (!tz_data_file) {
+        g_warning ("Could not get the TimeZone data file name");
+        return NULL;
+    }
 
     admin1_file = tz_data_file_get ("ADMIN1_FILE", ADMIN1_FILE);
     if (!admin1_file) {
@@ -465,8 +465,8 @@ tz_load_db (void)
 
     parse_file (country_file, 19, parse_countrycode, countryHash);
 
-	tz_db = g_new0 (TzDB, 1);
-	tz_db->locations = g_ptr_array_new ();
+    tz_db = g_new0 (TzDB, 1);
+    tz_db->locations = g_ptr_array_new ();
 
     Triple * triple = g_new (Triple, 1);
     triple->first = tz_db->locations;
@@ -480,14 +480,14 @@ tz_load_db (void)
     triple->second = NULL;
     triple->third = NULL;
 
-	/* now sort by country */
-	sort_locations_by_country (tz_db->locations);
-	
-	g_free (tz_data_file);
+    /* now sort by country */
+    sort_locations_by_country (tz_db->locations);
+
+    g_free (tz_data_file);
     g_hash_table_unref (countryHash);
-	
-	return tz_db;
-}    
+
+    return tz_db;
+}
 
 void
 tz_db_free (TzDB *db)
