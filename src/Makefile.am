@@ -44,7 +44,9 @@ dist_ui_DATA = \
 	data/timezone_9.png \
 	data/timezone_-9.5.png \
 	data/timezone_9.5.png \
-	data/cities15000.txt
+	data/cities15000.txt \
+	data/admin1Codes.txt \
+	data/countryInfo.txt
 
 tzdatadir = $(pkgdatadir)/
 dist_tzdata_DATA = backward
@@ -69,7 +71,8 @@ all-local: check-local
 
 # FIXME remove "|| :" when we have all the necessary pixmaps
 check-local: test-timezone
-	TZ_DATA_FILE=$(srcdir)/data/cities15000.txt $(builddir)/test-timezone $(srcdir)/data || :
+	TZ_DATA_FILE=$(srcdir)/data/cities15000.txt ADMIN1_FILE=$(srcdir)/data/admin1Codes.txt COUNTRY_FILE=$(srcdir)/data/countryInfo.txt \
+				 $(builddir)/test-timezone $(srcdir)/data || :
 
 lib_LTLIBRARIES = libtimezonemap.la
 

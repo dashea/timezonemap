@@ -1,3 +1,11 @@
+libtimezonemap (0.4.1) UNRELEASED; urgency=low
+
+  * Include countryInfo and admin1Codes from geonames (in addition to
+    cities15000 already shipped from there) and use them to provide "state"
+    and "full_country" properties.
+
+ -- Iain Lane <iain.lane@canonical.com>  Tue, 05 Nov 2013 10:16:34 +0000
+
 libtimezonemap (0.4.0.2) saucy; urgency=low
 
   * Allow using the tz data file from the build tree. Fixes amd64
