@@ -174,6 +174,12 @@ cc_timezone_location_dispose (GObject *object)
       priv->full_country = NULL;
     }
 
+  if (priv->state)
+    {
+      g_free (priv->state);
+      priv->state = NULL;
+    }
+
   if (priv->zone)
     {
       g_free (priv->zone);
