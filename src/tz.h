@@ -36,6 +36,7 @@
 #endif
 
 # define ADMIN1_FILE "/usr/share/libtimezonemap/ui/admin1Codes.txt"
+# define COUNTRY_FILE "/usr/share/libtimezonemap/ui/countryInfo.txt"
 
 G_BEGIN_DECLS
 
