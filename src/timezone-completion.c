@@ -138,13 +138,14 @@ json_parse_ready (GObject *object, GAsyncResult *res, gpointer user_data)
     g_cancellable_reset (priv->cancel);
   }
 
-  if (error != NULL) {
-    if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-      save_and_use_model (completion, priv->initial_model);
-    g_warning ("Could not parse geoname JSON data: %s", error->message);
-    g_error_free (error);
-    return;
-  }
+  if (error != NULL) 
+    {
+      if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+        save_and_use_model (completion, priv->initial_model);
+      g_warning ("Could not parse geoname JSON data: %s", error->message);
+      g_error_free (error);
+      return;
+    }
 
   GtkListStore * store = gtk_list_store_new (CC_TIMEZONE_COMPLETION_LAST,
                                              G_TYPE_STRING,
@@ -156,73 +157,85 @@ json_parse_ready (GObject *object, GAsyncResult *res, gpointer user_data)
 
   JsonReader * reader = json_reader_new (json_parser_get_root (JSON_PARSER (object)));
 
-  if (!json_reader_is_array (reader)) {
-    g_warning ("Could not parse geoname JSON data");
-    save_and_use_model (completion, priv->initial_model);
-    g_object_unref (G_OBJECT (reader));
-    return;
-  }
+  if (!json_reader_is_array (reader)) 
+    {
+      g_warning ("Could not parse geoname JSON data");
+      save_and_use_model (completion, priv->initial_model);
+      g_object_unref (G_OBJECT (reader));
+      return;
+    }
 
   gint i, count = json_reader_count_elements (reader);
-  for (i = 0; i < count; ++i) {
-    if (!json_reader_read_element (reader, i))
-      continue;
+  for (i = 0; i < count; ++i) 
+    {
+      if (!json_reader_read_element (reader, i))
+        continue;
 
-    if (json_reader_is_object (reader)) {
-      const gchar * name = NULL;
-      const gchar * admin1 = NULL;
-      const gchar * country = NULL;
-      const gchar * longitude = NULL;
-      const gchar * latitude = NULL;
-      gboolean skip = FALSE;
-      if (json_reader_read_member (reader, "name")) {
-        name = json_reader_get_string_value (reader);
-        json_reader_end_member (reader);
-      }
-      if (json_reader_read_member (reader, "admin1")) {
-        admin1 = json_reader_get_string_value (reader);
-        json_reader_end_member (reader);
-      }
-      if (json_reader_read_member (reader, "country")) {
-        country = json_reader_get_string_value (reader);
-        json_reader_end_member (reader);
-      }
-      if (json_reader_read_member (reader, "longitude")) {
-        longitude = json_reader_get_string_value (reader);
-        json_reader_end_member (reader);
-      }
-      if (json_reader_read_member (reader, "latitude")) {
-        latitude = json_reader_get_string_value (reader);
-        json_reader_end_member (reader);
-      }
+      if (json_reader_is_object (reader)) 
+        {
+          const gchar * name = NULL;
+          const gchar * admin1 = NULL;
+          const gchar * country = NULL;
+          const gchar * longitude = NULL;
+          const gchar * latitude = NULL;
+          gboolean skip = FALSE;
+          if (json_reader_read_member (reader, "name"))
+            {
+              name = json_reader_get_string_value (reader);
+              json_reader_end_member (reader);
+            }
+          if (json_reader_read_member (reader, "admin1"))
+            {
+              admin1 = json_reader_get_string_value (reader);
+              json_reader_end_member (reader);
+            }
+          if (json_reader_read_member (reader, "country"))
+            {
+              country = json_reader_get_string_value (reader);
+              json_reader_end_member (reader);
+            }
+          if (json_reader_read_member (reader, "longitude"))
+            {
+              longitude = json_reader_get_string_value (reader);
+              json_reader_end_member (reader);
+            }
+          if (json_reader_read_member (reader, "latitude"))
+            {
+              latitude = json_reader_get_string_value (reader);
+              json_reader_end_member (reader);
+            }
 
       if (g_strcmp0(name, prev_name) == 0 &&
           g_strcmp0(admin1, prev_admin1) == 0 &&
-          g_strcmp0(country, prev_country) == 0) {
-        // Sometimes the data will have duplicate entries that only differ
-        // in longitude and latitude.  e.g. "rio de janeiro", "wellington"
-        skip = TRUE;
-      }
+          g_strcmp0(country, prev_country) == 0)
+        {
+          // Sometimes the data will have duplicate entries that only differ
+          // in longitude and latitude.  e.g. "rio de janeiro", "wellington"
+          skip = TRUE;
+        }
 
-      if (!skip) {
-        GtkTreeIter iter;
-        gtk_list_store_append (store, &iter);
-        gtk_list_store_set (store, &iter,
-                            CC_TIMEZONE_COMPLETION_ZONE, NULL,
-                            CC_TIMEZONE_COMPLETION_NAME, name,
-                            CC_TIMEZONE_COMPLETION_ADMIN1, admin1,
-                            CC_TIMEZONE_COMPLETION_COUNTRY, country,
-                            CC_TIMEZONE_COMPLETION_LONGITUDE, longitude,
-                            CC_TIMEZONE_COMPLETION_LATITUDE, latitude,
-                            -1);
-        gtk_tree_sortable_set_sort_func (GTK_TREE_SORTABLE (store),
-                                         CC_TIMEZONE_COMPLETION_NAME, sort_zone,
-                                         g_utf8_casefold(priv->request_text, -1),
-                                         g_free);
-        gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (store),
-                                              CC_TIMEZONE_COMPLETION_NAME,
-                                              GTK_SORT_ASCENDING);
-      }
+      if (!skip) 
+        {
+          GtkTreeIter iter;
+          gtk_list_store_append (store, &iter);
+          gtk_list_store_set (store, &iter,
+                              CC_TIMEZONE_COMPLETION_ZONE, NULL,
+                              CC_TIMEZONE_COMPLETION_NAME, name,
+                              CC_TIMEZONE_COMPLETION_ADMIN1, admin1,
+                              CC_TIMEZONE_COMPLETION_COUNTRY, country,
+                              CC_TIMEZONE_COMPLETION_LONGITUDE, longitude,
+                              CC_TIMEZONE_COMPLETION_LATITUDE, latitude,
+                              -1);
+          gtk_tree_sortable_set_sort_func (GTK_TREE_SORTABLE (store),
+                                           CC_TIMEZONE_COMPLETION_NAME,
+                                           sort_zone,
+                                           g_utf8_casefold(priv->request_text,
+                                             -1),
+                                           g_free);
+          gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (store),
+                                                CC_TIMEZONE_COMPLETION_NAME,
+                                                GTK_SORT_ASCENDING);
+        }
 
       prev_name = name;
       prev_admin1 = admin1;
@@ -232,19 +245,21 @@ json_parse_ready (GObject *object, GAsyncResult *res, gpointer user_data)
     json_reader_end_element (reader);
   }
 
-  if (strlen (priv->request_text) < 4) {
-    gchar * lower_text = g_ascii_strdown (priv->request_text, -1);
-    if (g_strcmp0 (lower_text, "ut") == 0 ||
-        g_strcmp0 (lower_text, "utc") == 0) {
-      GtkTreeIter iter;
-      gtk_list_store_append (store, &iter);
-      gtk_list_store_set (store, &iter,
-                          CC_TIMEZONE_COMPLETION_ZONE, "UTC",
-                          CC_TIMEZONE_COMPLETION_NAME, "UTC",
-                          -1);
+  if (strlen (priv->request_text) < 4)
+    {
+      gchar * lower_text = g_ascii_strdown (priv->request_text, -1);
+      if (g_strcmp0 (lower_text, "ut") == 0 ||
+          g_strcmp0 (lower_text, "utc") == 0)
+        {
+           GtkTreeIter iter;
+           gtk_list_store_append (store, &iter);
+           gtk_list_store_set (store, &iter,
+                               CC_TIMEZONE_COMPLETION_ZONE, "UTC",
+                                CC_TIMEZONE_COMPLETION_NAME, "UTC",
+                               -1);
+        }
+      g_free (lower_text);
     }
-    g_free (lower_text);
-  }
 
   save_and_use_model (completion, GTK_TREE_MODEL (store));
   g_object_unref (G_OBJECT (reader));
@@ -260,17 +275,20 @@ geonames_data_ready (GObject *object, GAsyncResult *res, gpointer user_data)
 
   stream = g_file_read_finish (G_FILE (object), res, &error);
 
-  if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED) && priv->cancel) {
-    g_cancellable_reset (priv->cancel);
-  }
+  if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED) && priv->cancel)
+    {
+      g_cancellable_reset (priv->cancel);
+    }
 
-  if (error != NULL) {
-    if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-      save_and_use_model (completion, priv->initial_model);
-    g_warning ("Could not connect to geoname lookup server: %s", error->message);
-    g_error_free (error);
-    return;
-  }
+  if (error != NULL)
+    {
+      if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+        save_and_use_model (completion, priv->initial_model);
+      g_warning ("Could not connect to geoname lookup server: %s",
+          error->message);
+      g_error_free (error);
+      return;
+    }
 
   JsonParser * parser = json_parser_new ();
   json_parser_load_from_stream_async (parser, G_INPUT_STREAM (stream), priv->cancel,
@@ -286,11 +304,12 @@ get_locale (void)
   const gchar *env = NULL;
   gint i;
 
-  for (i = 0; env_names[i]; i++) {
-    env = g_getenv (env_names[i]);
-    if (env != NULL && env[0] != 0)
-      break;
-  }
+  for (i = 0; env_names[i]; i++)
+    {
+      env = g_getenv (env_names[i]);
+      if (env != NULL && env[0] != 0)
+        break;
+    }
 
   if (env == NULL)
     return NULL;
@@ -301,10 +320,11 @@ get_locale (void)
   if (split == NULL)
     return NULL;
 
-  if (split[0] == NULL) {
-    g_strfreev (split);
-    return NULL;
-  }
+  if (split[0] == NULL)
+    {
+      g_strfreev (split);
+      return NULL;
+    }
 
   gchar *locale = g_strdup (split[0]);
   g_strfreev (split);
@@ -316,15 +336,16 @@ get_version (void)
 {
   static gchar *version = NULL;
 
-  if (version == NULL) {
-    gchar *stdout = NULL;
-    g_spawn_command_line_sync ("lsb_release -rs", &stdout, NULL, NULL, NULL);
+  if (version == NULL)
+    {
+      gchar *stdout = NULL;
+      g_spawn_command_line_sync ("lsb_release -rs", &stdout, NULL, NULL, NULL);
 
-    if (stdout != NULL)
-      version = g_strstrip (stdout);
-    else
-      version = g_strdup("");
-  }
+      if (stdout != NULL)
+        version = g_strstrip (stdout);
+      else
+        version = g_strdup("");
+    }
 
   return version;
 }
@@ -336,15 +357,17 @@ request_zones (CcTimezoneCompletion * completion)
 
   priv->queued_request = 0;
 
-  if (priv->entry == NULL) {
-    return FALSE;
-  }
+  if (priv->entry == NULL)
+    {
+      return FALSE;
+    }
 
   /* Cancel any ongoing request */
-  if (priv->cancel) {
-    g_cancellable_cancel (priv->cancel);
-    g_cancellable_reset (priv->cancel);
-  }
+  if (priv->cancel)
+    {
+      g_cancellable_cancel (priv->cancel);
+      g_cancellable_reset (priv->cancel);
+    }
   g_free (priv->request_text);
 
   const gchar * text = gtk_entry_get_text (priv->entry);
@@ -371,21 +394,26 @@ entry_changed (GtkEntry * entry, CcTimezoneCompletion * completion)
 {
   CcTimezoneCompletionPrivate * priv = completion->priv;
 
-  if (priv->queued_request) {
-    g_source_remove (priv->queued_request);
-    priv->queued_request = 0;
-  }
+  if (priv->queued_request)
+    {
+      g_source_remove (priv->queued_request);
+      priv->queued_request = 0;
+    }
 
   /* See if we've already got this one */
   const gchar * text = gtk_entry_get_text (priv->entry);
   gpointer data;
-  if (g_hash_table_lookup_extended (priv->request_table, text, NULL, &data)) {
-    gtk_entry_completion_set_model (GTK_ENTRY_COMPLETION (completion), GTK_TREE_MODEL (data));
-  }
-  else {
-    priv->queued_request = g_timeout_add (300, (GSourceFunc)request_zones, completion);
-    gtk_entry_completion_set_model (GTK_ENTRY_COMPLETION (completion), NULL);
-  }
+  if (g_hash_table_lookup_extended (priv->request_table, text, NULL, &data))
+    {
+      gtk_entry_completion_set_model (GTK_ENTRY_COMPLETION (completion),
+          GTK_TREE_MODEL (data));
+    }
+  else 
+    {
+      priv->queued_request = g_timeout_add (300, (GSourceFunc)request_zones,
+          completion);
+      gtk_entry_completion_set_model (GTK_ENTRY_COMPLETION (completion), NULL);
+    }
   gtk_entry_completion_complete (GTK_ENTRY_COMPLETION (completion));
 }
 
@@ -395,18 +423,21 @@ get_descendent (GtkWidget * parent, GType type)
   if (g_type_is_a (G_OBJECT_TYPE (parent), type))
     return parent;
 
-  if (GTK_IS_CONTAINER (parent)) {
-    GList * children = gtk_container_get_children (GTK_CONTAINER (parent));
-    GList * iter;
-    for (iter = children; iter; iter = iter->next) {
-      GtkWidget * found = get_descendent (GTK_WIDGET (iter->data), type);
-      if (found) {
-        g_list_free (children);
-        return found;
-      }
+  if (GTK_IS_CONTAINER (parent))
+    {
+      GList * children = gtk_container_get_children (GTK_CONTAINER (parent));
+      GList * iter;
+      for (iter = children; iter; iter = iter->next)
+        {
+          GtkWidget * found = get_descendent (GTK_WIDGET (iter->data), type);
+          if (found)
+            {
+              g_list_free (children);
+              return found;
+            }
+        }
+      g_list_free (children);
     }
-    g_list_free (children);
-  }
 
   return NULL;
 }
@@ -429,20 +460,26 @@ find_popup_treeview (GtkWidget * widget, GtkTreeModel * model)
   GtkWindowGroup * group = gtk_window_get_group (GTK_WINDOW (toplevel)); 
   GList * windows = gtk_window_group_list_windows (group);
   GList * iter;
-  for (iter = windows; iter; iter = iter->next) {
-    if (iter->data == toplevel)
-      continue; // Skip our own window, we don't have it
-    GtkWidget * view = get_descendent (GTK_WIDGET (iter->data), GTK_TYPE_TREE_VIEW);
-    if (view != NULL) {
-      GtkTreeModel * tree_model = gtk_tree_view_get_model (GTK_TREE_VIEW (view));
-      if (GTK_IS_TREE_MODEL_FILTER (tree_model))
-        tree_model = gtk_tree_model_filter_get_model (GTK_TREE_MODEL_FILTER (tree_model));
-      if (tree_model == model) {
-        g_list_free (windows);
-        return GTK_TREE_VIEW (view);
-      }
+  for (iter = windows; iter; iter = iter->next)
+    {
+      if (iter->data == toplevel)
+        continue; // Skip our own window, we don't have it
+      GtkWidget * view = get_descendent (GTK_WIDGET (iter->data),
+          GTK_TYPE_TREE_VIEW);
+       if (view != NULL)
+         {
+          GtkTreeModel * tree_model =
+            gtk_tree_view_get_model (GTK_TREE_VIEW (view));
+          if (GTK_IS_TREE_MODEL_FILTER (tree_model))
+            tree_model = gtk_tree_model_filter_get_model (
+                GTK_TREE_MODEL_FILTER (tree_model));
+          if (tree_model == model)
+            {
+              g_list_free (windows);
+              return GTK_TREE_VIEW (view);
+            }
+        }
     }
-  }
   g_list_free (windows);
 
   return NULL;
@@ -453,26 +490,30 @@ entry_keypress (GtkEntry * entry, GdkEventKey  *event, CcTimezoneCompletion * co
 {
   if (event->keyval == GDK_KEY_ISO_Enter ||
       event->keyval == GDK_KEY_KP_Enter ||
-	    event->keyval == GDK_KEY_Return) {
-    /* Make sure that user has a selection to choose, otherwise ignore */
-    GtkTreeModel * model = gtk_entry_completion_get_model (GTK_ENTRY_COMPLETION (completion));
-    GtkTreeView * view = find_popup_treeview (GTK_WIDGET (entry), model);
-    if (view == NULL) {
-      // Just beep if popup hasn't appeared yet.
-      gtk_widget_error_bell (GTK_WIDGET (entry));
-      return TRUE;
-    }
+      event->keyval == GDK_KEY_Return)
+    {
+      /* Make sure that user has a selection to choose, otherwise ignore */
+      GtkTreeModel * model = gtk_entry_completion_get_model (
+          GTK_ENTRY_COMPLETION (completion));
+      GtkTreeView * view = find_popup_treeview (GTK_WIDGET (entry), model);
+      if (view == NULL)
+       {
+         // Just beep if popup hasn't appeared yet.
+         gtk_widget_error_bell (GTK_WIDGET (entry));
+         return TRUE;
+       }
 
-    GtkTreeSelection * sel = gtk_tree_view_get_selection (view);
-    GtkTreeModel * sel_model = NULL;
-    if (!gtk_tree_selection_get_selected (sel, &sel_model, NULL)) {
-      // No selection, we should help them out and select first item in list
-      GtkTreeIter iter;
-      if (gtk_tree_model_get_iter_first (sel_model, &iter))
-        gtk_tree_selection_select_iter (sel, &iter);
-      // And fall through to normal handler code
+      GtkTreeSelection * sel = gtk_tree_view_get_selection (view);
+      GtkTreeModel * sel_model = NULL;
+      if (!gtk_tree_selection_get_selected (sel, &sel_model, NULL))
+        {
+          // No selection, we should help them out and select first item in list
+          GtkTreeIter iter;
+          if (gtk_tree_model_get_iter_first (sel_model, &iter))
+            gtk_tree_selection_select_iter (sel, &iter);
+          // And fall through to normal handler code
+        }
     }
-  }
 
   return FALSE;
 }
@@ -482,32 +523,37 @@ cc_timezone_completion_watch_entry (CcTimezoneCompletion * completion, GtkEntry 
 {
   CcTimezoneCompletionPrivate * priv = completion->priv;
 
-  if (priv->queued_request) {
-    g_source_remove (priv->queued_request);
-    priv->queued_request = 0;
-  }
-  if (priv->entry) {
-    g_signal_handler_disconnect (priv->entry, priv->changed_id);
-    priv->changed_id = 0;
-    g_signal_handler_disconnect (priv->entry, priv->keypress_id);
-    priv->keypress_id = 0;
-    g_object_remove_weak_pointer (G_OBJECT (priv->entry), (gpointer *)&priv->entry);
-    gtk_entry_set_completion (priv->entry, NULL);
-  }
+  if (priv->queued_request)
+    {
+      g_source_remove (priv->queued_request);
+      priv->queued_request = 0;
+    }
+  if (priv->entry)
+    {
+      g_signal_handler_disconnect (priv->entry, priv->changed_id);
+      priv->changed_id = 0;
+      g_signal_handler_disconnect (priv->entry, priv->keypress_id);
+      priv->keypress_id = 0;
+      g_object_remove_weak_pointer (G_OBJECT (priv->entry), (gpointer *)&priv->entry);
+      gtk_entry_set_completion (priv->entry, NULL);
+    }
 
   priv->entry = entry;
 
-  if (entry) {
-    guint id = g_signal_connect (entry, "changed", G_CALLBACK (entry_changed), completion);
-    priv->changed_id = id;
+  if (entry)
+    {
+      guint id = g_signal_connect (entry, "changed",
+          G_CALLBACK (entry_changed), completion);
+      priv->changed_id = id;
 
-    id = g_signal_connect (entry, "key-press-event", G_CALLBACK (entry_keypress), completion);
-    priv->keypress_id = id;
+      id = g_signal_connect (entry, "key-press-event",
+          G_CALLBACK (entry_keypress), completion);
+      priv->keypress_id = id;
 
-    g_object_add_weak_pointer (G_OBJECT (entry), (gpointer *)&priv->entry);
+      g_object_add_weak_pointer (G_OBJECT (entry), (gpointer *)&priv->entry);
 
-    gtk_entry_set_completion (entry, GTK_ENTRY_COMPLETION (completion));
-  }
+      gtk_entry_set_completion (entry, GTK_ENTRY_COMPLETION (completion));
+    }
 }
 
 static GtkListStore *
@@ -525,37 +571,38 @@ get_initial_model (void)
                                              G_TYPE_STRING);
 
   gint i;
-  for (i = 0; i < locations->len; ++i) {
-    CcTimezoneLocation * loc = g_ptr_array_index (locations, i);
-    GtkTreeIter iter;
-    gtk_list_store_append (store, &iter);
+  for (i = 0; i < locations->len; ++i)
+    {
+      CcTimezoneLocation * loc = g_ptr_array_index (locations, i);
+      GtkTreeIter iter;
+      gtk_list_store_append (store, &iter);
 
-    gchar * zone;
-    gchar * country;
-    gchar * en_name; // FIXME: need something better for non-English locales 
-    gdouble longitude;
-    gdouble latitude;
-    g_object_get (loc, "zone", &zone, "country", &country, "en_name", &en_name,
-                  "longitude", &longitude, "latitude", &latitude,
-                  NULL);
+      gchar * zone;
+      gchar * country;
+      gchar * en_name; // FIXME: need something better for non-English locales 
+      gdouble longitude;
+      gdouble latitude;
+      g_object_get (loc, "zone", &zone, "country", &country, "en_name", &en_name,
+                    "longitude", &longitude, "latitude", &latitude,
+                    NULL);
 
-    gchar * longitude_s = g_strdup_printf ("%f", longitude);
-    gchar * latitude_s=  g_strdup_printf ("%f", latitude);
+      gchar * longitude_s = g_strdup_printf ("%f", longitude);
+      gchar * latitude_s=  g_strdup_printf ("%f", latitude);
 
-    gtk_list_store_set (store, &iter,
-                        CC_TIMEZONE_COMPLETION_ZONE, NULL,
-                        CC_TIMEZONE_COMPLETION_NAME, en_name,
-                        CC_TIMEZONE_COMPLETION_COUNTRY, country,
-                        CC_TIMEZONE_COMPLETION_LONGITUDE, longitude_s,
-                        CC_TIMEZONE_COMPLETION_LATITUDE, latitude_s,
-                        -1);
+      gtk_list_store_set (store, &iter,
+                          CC_TIMEZONE_COMPLETION_ZONE, NULL,
+                          CC_TIMEZONE_COMPLETION_NAME, en_name,
+                          CC_TIMEZONE_COMPLETION_COUNTRY, country,
+                          CC_TIMEZONE_COMPLETION_LONGITUDE, longitude_s,
+                          CC_TIMEZONE_COMPLETION_LATITUDE, latitude_s,
+                          -1);
 
-    g_free (latitude_s);
-    g_free (longitude_s);
-    g_free (en_name);
-    g_free (country);
-    g_free (zone);
-  }
+      g_free (latitude_s);
+      g_free (longitude_s);
+      g_free (en_name);
+      g_free (country);
+      g_free (zone);
+    }
 
   GtkTreeIter iter;
   gtk_list_store_append (store, &iter);
@@ -581,13 +628,14 @@ data_func (GtkCellLayout *cell_layout, GtkCellRenderer *cell,
                       -1);
 
   gchar * user_name;
-  if (country == NULL || country[0] == 0) {
-    user_name = g_strdup (name);
-  } else if (admin1 == NULL || admin1[0] == 0) {
-    user_name = g_strdup_printf ("%s <small>(%s)</small>", name, country);
-  } else {
-    user_name = g_strdup_printf ("%s <small>(%s, %s)</small>", name, admin1, country);
-  }
+  if (country == NULL || country[0] == 0)
+    {
+      user_name = g_strdup (name);
+    } else if (admin1 == NULL || admin1[0] == 0) {
+      user_name = g_strdup_printf ("%s <small>(%s)</small>", name, country);
+    } else {
+      user_name = g_strdup_printf ("%s <small>(%s, %s)</small>", name, admin1, country);
+    }
 
   g_object_set (G_OBJECT (cell), "markup", user_name, NULL);
 }
@@ -641,49 +689,57 @@ cc_timezone_completion_dispose (GObject * object)
   CcTimezoneCompletion * completion = CC_TIMEZONE_COMPLETION (object);
   CcTimezoneCompletionPrivate * priv = completion->priv;
 
-  if (priv->changed_id) {
-    if (priv->entry)
-      g_signal_handler_disconnect (priv->entry, priv->changed_id);
-    priv->changed_id = 0;
-  }
+  if (priv->changed_id)
+    {
+      if (priv->entry)
+        g_signal_handler_disconnect (priv->entry, priv->changed_id);
+      priv->changed_id = 0;
+    }
 
-  if (priv->keypress_id) {
-    if (priv->entry)
-      g_signal_handler_disconnect (priv->entry, priv->keypress_id);
-    priv->keypress_id = 0;
-  }
+  if (priv->keypress_id)
+    {
+      if (priv->entry)
+        g_signal_handler_disconnect (priv->entry, priv->keypress_id);
+      priv->keypress_id = 0;
+    }
 
-  if (priv->entry != NULL) {
-    gtk_entry_set_completion (priv->entry, NULL);
-    g_object_remove_weak_pointer (G_OBJECT (priv->entry), (gpointer *)&priv->entry);
-    priv->entry = NULL;
-  }
+  if (priv->entry != NULL)
+    {
+      gtk_entry_set_completion (priv->entry, NULL);
+      g_object_remove_weak_pointer (G_OBJECT (priv->entry), (gpointer *)&priv->entry);
+      priv->entry = NULL;
+    }
 
-  if (priv->initial_model != NULL) {
-    g_object_unref (G_OBJECT (priv->initial_model));
-    priv->initial_model = NULL;
-  }
+  if (priv->initial_model != NULL)
+    {
+      g_object_unref (G_OBJECT (priv->initial_model));
+      priv->initial_model = NULL;
+    }
 
-  if (priv->queued_request) {
-    g_source_remove (priv->queued_request);
-    priv->queued_request = 0;
-  }
+  if (priv->queued_request)
+    {
+      g_source_remove (priv->queued_request);
+      priv->queued_request = 0;
+    }
 
-  if (priv->cancel != NULL) {
-    g_cancellable_cancel (priv->cancel);
-    g_object_unref (priv->cancel);
-    priv->cancel = NULL;
-  }
+  if (priv->cancel != NULL)
+    {
+      g_cancellable_cancel (priv->cancel);
+      g_object_unref (priv->cancel);
+      priv->cancel = NULL;
+    }
 
-  if (priv->request_text != NULL) {
-    g_free (priv->request_text);
-    priv->request_text = NULL;
-  }
+  if (priv->request_text != NULL)
+    {
+      g_free (priv->request_text);
+      priv->request_text = NULL;
+    }
 
-  if (priv->request_table != NULL) {
-    g_hash_table_destroy (priv->request_table);
-    priv->request_table = NULL;
-  }
+  if (priv->request_table != NULL)
+    {
+      g_hash_table_destroy (priv->request_table);
+      priv->request_table = NULL;
+    }
 
   return;
 }
