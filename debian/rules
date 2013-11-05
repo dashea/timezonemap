@@ -9,6 +9,10 @@ include /usr/share/cdbs/1/class/gnome.mk
 DEB_CONFIGURE_FLAGS_gtk3 = --with-gtk=3
 DEB_CONFIGURE_EXTRA_FLAGS = --disable-static --enable-introspection
 
+# To generate dependencies tight enough so that consumers of the object
+# properties can access them.
+DEB_DH_MAKESHLIBS_ARGS = -V
+
 LDFLAGS += -Wl,-z,defs -Wl,--as-needed
 
 debian/stamp-autotools/gtk3: cdbs_configure_flags += $(DEB_CONFIGURE_FLAGS_gtk3)
