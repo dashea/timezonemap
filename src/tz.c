@@ -51,9 +51,9 @@ G_DEFINE_TYPE (CcTimezoneLocation, cc_timezone_location, G_TYPE_OBJECT)
 struct _CcTimezoneLocationPrivate
 {
 	gchar *country;
-    gchar *full_country;
+	gchar *full_country;
 	gchar *en_name;
-    gchar *state;
+	gchar *state;
 	gdouble latitude;
 	gdouble longitude;
 	gchar *zone;
@@ -295,21 +295,21 @@ void parse_file (const char * filename,
                  GFunc func,
                  gpointer user_data)
 {
-	FILE *fh = fopen (filename, "r");
+    FILE *fh = fopen (filename, "r");
     char buf[4096];
 
-	if (!fh) {
-		g_warning ("Could not open *%s*\n", filename);
+    if (!fh) {
+        g_warning ("Could not open *%s*\n", filename);
         fclose (fh);
-		return;
-	}
+        return;
+    }
 
     while (fgets (buf, sizeof(buf), fh))
     {
-		if (*buf == '#') continue;
+        if (*buf == '#') continue;
 
-		g_strchomp (buf);
-		func (g_strsplit (buf,"\t", ncolumns), user_data);
+        g_strchomp (buf);
+        func (g_strsplit (buf,"\t", ncolumns), user_data);
     }
 
     fclose (fh);
@@ -322,8 +322,8 @@ void parse_admin1Codes (gpointer parsed_data,
     GHashTable * hash_table = (GHashTable *) user_data;
 
     g_hash_table_insert (hash_table,
-                         g_strdup (parsed_data_v[0]),
-                         g_strdup (parsed_data_v[1]));
+            g_strdup (parsed_data_v[0]),
+            g_strdup (parsed_data_v[1]));
 
     g_strfreev (parsed_data_v);
 
@@ -336,8 +336,8 @@ void parse_countrycode (gpointer parsed_data,
     GHashTable * hash_table = (GHashTable *) user_data;
 
     g_hash_table_insert (hash_table,
-                         g_strdup (parsed_data_v[0]),
-                         g_strdup (parsed_data_v[4]));
+            g_strdup (parsed_data_v[0]),
+            g_strdup (parsed_data_v[4]));
 
     g_strfreev (parsed_data_v);
 }
@@ -378,7 +378,7 @@ void parse_cities15000 (gpointer parsed_data,
     loc->priv->zone = g_strdup (parsed_data_v[17]);
     loc->priv->latitude  = g_ascii_strtod(parsed_data_v[4], NULL);
     loc->priv->longitude = g_ascii_strtod(parsed_data_v[5], NULL);
-    
+
 #ifdef __sun
     gchar *latstr, *lngstr, *p;
 
@@ -387,7 +387,7 @@ void parse_cities15000 (gpointer parsed_data,
     while (*p != '-' && *p != '+') p++;
     lngstr = g_strdup (p);
     *p = '\0';
-    
+
     if (parsed_data_v[3] && *parsed_data_v[3] == '-' && parsed_data_v[4])
         loc->comment = g_strdup (parsed_data_v[4]);
 
