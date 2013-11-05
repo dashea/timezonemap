@@ -654,11 +654,11 @@ tz_info_free (TzInfo *tzinfo)
 static gchar *
 tz_data_file_get (gchar *env, gchar *defaultfile)
 {
-	/* Allow passing this in at runtime, to support loading it from the build
-	* tree during tests. */
+    /* Allow passing this in at runtime, to support loading it from the build
+     * tree during tests. */
     const gchar * filename = g_getenv (env);
 
-	return filename ? g_strdup (filename) : g_strdup (defaultfile);
+    return filename ? g_strdup (filename) : g_strdup (defaultfile);
 }
 
 #ifdef __sun
