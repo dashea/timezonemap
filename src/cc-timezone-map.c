@@ -974,40 +974,41 @@ get_loc_for_xy (GtkWidget * widget, gint x, gint y)
   width = alloc.width;
   height = alloc.height;
 
-  if (x == priv->previous_x && y == priv->previous_y) {
-    priv->distances = g_list_next (priv->distances);
-    location = (CcTimezoneLocation*) priv->distances->data;
-  } else {
-    g_list_free (priv->distances);
-    priv->distances = NULL;
-    for (i = 0; i < array->len; i++)
-      {
-        gdouble pointx, pointy, dx, dy;
-        CcTimezoneLocation *loc = array->pdata[i];
+  if (x == priv->previous_x && y == priv->previous_y) 
+    {
+      priv->distances = g_list_next (priv->distances);
+      location = (CcTimezoneLocation*) priv->distances->data;
+    } else {
+      g_list_free (priv->distances);
+      priv->distances = NULL;
+      for (i = 0; i < array->len; i++)
+        {
+          gdouble pointx, pointy, dx, dy;
+          CcTimezoneLocation *loc = array->pdata[i];
 
-        g_object_get_property(G_OBJECT (loc), "longitude", &glon);
-        g_object_get_property(G_OBJECT (loc), "latitude", &glat);
-        pointx = convert_longtitude_to_x (g_value_get_double(&glon), width);
-        pointy = convert_latitude_to_y (g_value_get_double(&glat), height);
+          g_object_get_property(G_OBJECT (loc), "longitude", &glon);
+          g_object_get_property(G_OBJECT (loc), "latitude", &glat);
+          pointx = convert_longtitude_to_x (g_value_get_double(&glon), width);
+          pointy = convert_latitude_to_y (g_value_get_double(&glat), height);
 
-        dx = pointx - x;
-        dy = pointy - y;
+          dx = pointx - x;
+          dy = pointy - y;
 
-        g_value_set_double(&gdist, (gdouble) dx * dx + dy * dy);
-        g_object_set_property(G_OBJECT (loc), "dist", &gdist);
-        priv->distances = g_list_prepend (priv->distances, loc);
-      }
-    priv->distances = g_list_sort (priv->distances, (GCompareFunc) sort_locations);
-    location = (CcTimezoneLocation*) priv->distances->data;
-    priv->previous_x = x;
-    priv->previous_y = y;
-  }
+          g_value_set_double(&gdist, (gdouble) dx * dx + dy * dy);
+          g_object_set_property(G_OBJECT (loc), "dist", &gdist);
+          priv->distances = g_list_prepend (priv->distances, loc);
+        }
+      priv->distances = g_list_sort (priv->distances, (GCompareFunc) sort_locations);
+      location = (CcTimezoneLocation*) priv->distances->data;
+      priv->previous_x = x;
+      priv->previous_y = y;
+    }
 
-  g_value_unset (&glon);
-  g_value_unset (&glat);
-  g_value_unset (&gdist);
+    g_value_unset (&glon);
+    g_value_unset (&glat);
+    g_value_unset (&gdist);
 
-  return location;
+    return location;
 }
 
 static gboolean
@@ -1199,20 +1200,20 @@ cc_timezone_map_get_timezone_at_coords (CcTimezoneMap *map, gdouble lon, gdouble
   if (zone < G_N_ELEMENTS(olsen_map_timezones))
     city = olsen_map_timezones[zone];
 
-  if (city != NULL) {
-    return city;
-  }
-  else {
-    GtkAllocation alloc;
-    GValue val_zone = {0};
-    g_value_init (&val_zone, G_TYPE_STRING);
-    gtk_widget_get_allocation (GTK_WIDGET (map), &alloc);
-    x = convert_longtitude_to_x(lon, alloc.width);
-    y = convert_latitude_to_y(lat, alloc.height);
-    CcTimezoneLocation * loc = get_loc_for_xy(GTK_WIDGET (map), x, y);
-    g_value_unset (&val_zone);
-    return g_value_get_string(&val_zone);
-  }
+  if (city != NULL)
+    {
+      return city;
+    } else {
+      GtkAllocation alloc;
+      GValue val_zone = {0};
+      g_value_init (&val_zone, G_TYPE_STRING);
+      gtk_widget_get_allocation (GTK_WIDGET (map), &alloc);
+      x = convert_longtitude_to_x(lon, alloc.width);
+      y = convert_latitude_to_y(lat, alloc.height);
+      CcTimezoneLocation * loc = get_loc_for_xy(GTK_WIDGET (map), x, y);
+      g_value_unset (&val_zone);
+      return g_value_get_string(&val_zone);
+    }
 }
 
 void
