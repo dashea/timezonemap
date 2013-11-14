@@ -124,16 +124,20 @@ cc_timezone_location_set_property (GObject      *object,
   CcTimezoneLocationPrivate *priv = CC_TIMEZONE_LOCATION (object)->priv;
   switch (property_id) {
     case PROP_COUNTRY:
-      priv->country = g_value_get_string(value);
+      g_free(priv->country);
+      priv->country = g_strdup(g_value_get_string(value));
       break;
     case PROP_FULL_COUNTRY:
-      priv->full_country = g_value_get_string(value);
+      g_free(priv->full_country);
+      priv->full_country = g_strdup(g_value_get_string(value));
       break;
     case PROP_EN_NAME:
-      priv->en_name = g_value_get_string(value);
+      g_free(priv->en_name);
+      priv->en_name = g_strdup(g_value_get_string(value));
       break;
     case PROP_STATE:
-      priv->state = g_value_get_string(value);
+      g_free(priv->state);
+      priv->state = g_strdup(g_value_get_string(value));
       break;
     case PROP_LATITUDE:
       priv->latitude = g_value_get_double(value);
@@ -142,10 +146,12 @@ cc_timezone_location_set_property (GObject      *object,
       priv->longitude = g_value_get_double(value);
       break;
     case PROP_ZONE:
-      priv->zone = g_value_get_string(value);
+      g_strdup(priv->zone);
+      priv->zone = g_strdup(g_value_get_string(value));
       break;
     case PROP_COMMENT:
-      priv->comment = g_value_get_string(value);
+      g_free(priv->comment);
+      priv->comment = g_strdup(g_value_get_string(value));
       break;
     case PROP_DIST:
       priv->dist = g_value_get_double(value);
@@ -170,6 +176,12 @@ cc_timezone_location_dispose (GObject *object)
     {
       g_free (priv->full_country);
       priv->full_country = NULL;
+    }
+
+  if (priv->en_name)
+    {
+      g_free (priv->en_name);
+      priv->en_name = NULL;
     }
 
   if (priv->state) 
