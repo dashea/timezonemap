@@ -63,7 +63,7 @@ AM_CPPFLAGS =						\
 
 noinst_PROGRAMS = test-timezone
 
-test_timezone_SOURCES = test-timezone.c tz.c tz.h
+test_timezone_SOURCES = test-timezone.c cc-timezone-location.c tz.c tz.h
 test_timezone_LDADD = $(LIBTIMEZONEMAP_LIBS) -lm
 test_timezone_CFLAGS = $(LIBTIMEZONEMAP_CFLAGS)
 
@@ -76,12 +76,11 @@ check-local: test-timezone
 
 lib_LTLIBRARIES = libtimezonemap.la
 
-libtimezonemap_la_SOURCES =	\
-	cc-timezone-map.c	\
-	cc-timezone-map.h	\
-	timezone-completion.c	\
-	timezone-completion.h	\
-	tz.c tz.h
+libtimezonemap_GISOURCES = cc-timezone-map.c cc-timezone-map.h \
+			   cc-timezone-location.c cc-timezone-location.h \
+			   timezone-completion.c timezone-completion.h
+libtimezonemap_NONGISOURCES = tz.c tz.h
+libtimezonemap_la_SOURCES = $(libtimezonemap_GISOURCES) $(libtimezonemap_NONGISOURCES)
 
 # Specify 'timezonemap' twice: once for package (so we could eventually add
 # a timezonemap-gtk4 for example), and once for namespacing inside code so
@@ -105,7 +104,7 @@ INTROSPECTION_COMPILER_ARGS = --includedir=$(srcdir)
 
 INTROSPECTION_GIRS = TimezoneMap-1.0.gir
 
-introspection_sources = $(libtimezonemap_la_SOURCES)
+introspection_sources = $(libtimezonemap_GISOURCES)
 
 TimezoneMap-1.0.gir: libtimezonemap.la
 TimezoneMap_1_0_gir_INCLUDES = GObject-2.0 Gtk-3.0 Json-1.0
