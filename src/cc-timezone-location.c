@@ -315,7 +315,7 @@ const gchar *cc_timezone_location_get_en_name(CcTimezoneLocation *loc)
 void cc_timezone_location_set_en_name(CcTimezoneLocation *loc, const gchar *en_name)
 {
     g_free(loc->priv->en_name);
-    loc->priv->full_country = g_strdup(en_name);
+    loc->priv->en_name = g_strdup(en_name);
 
     g_object_notify(G_OBJECT(loc), "en_name");
 }
