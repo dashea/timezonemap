@@ -23,7 +23,9 @@ int main (int argc, char **argv)
         return 1;
       }
 
+#if !GLIB_CHECK_VERSION(2, 35, 0)
     g_type_init();
+#endif
     GValue zone = {0};
     g_value_init(&zone, G_TYPE_STRING);
 
