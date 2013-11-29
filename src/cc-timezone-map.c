@@ -24,6 +24,7 @@
  */
 
 #include "cc-timezone-map.h"
+#include "cc-timezone-location.h"
 #include <math.h>
 #include "tz.h"
 
@@ -822,16 +823,10 @@ cc_timezone_map_draw (GtkWidget *widget,
       g_clear_error (&err);
     }
 
-  GValue lat = {0};
-  GValue lon = {0};
-  g_value_init (&lat, G_TYPE_DOUBLE);
-  g_value_init (&lon, G_TYPE_DOUBLE);
-  g_object_get_property(G_OBJECT (priv->location), "latitude", &lat);
-  g_object_get_property(G_OBJECT (priv->location), "longitude", &lon);
-  pointx = convert_longtitude_to_x (g_value_get_double(&lon), alloc.width);
-  pointy = convert_latitude_to_y (g_value_get_double(&lat), alloc.height);
-  g_value_unset (&lon);
-  g_value_unset (&lat);
+  pointx = convert_longtitude_to_x (
+          cc_timezone_location_get_longitude(priv->location), alloc.width);
+  pointy = convert_latitude_to_y (
+          cc_timezone_location_get_latitude(priv->location), alloc.height);
 
   if (pointy > alloc.height)
     pointy = alloc.height;
@@ -881,17 +876,9 @@ static gint
 sort_locations (CcTimezoneLocation *a,
                 CcTimezoneLocation *b)
 {
-  GValue val_a = {0};
-  GValue val_b = {0};
   gdouble dist_a, dist_b;
-  g_value_init (&val_a, G_TYPE_DOUBLE);
-  g_value_init (&val_b, G_TYPE_DOUBLE);
-  g_object_get_property(G_OBJECT (a), "dist", &val_a);
-  g_object_get_property(G_OBJECT (b), "dist", &val_b);
-  dist_a = g_value_get_double(&val_a);
-  dist_b = g_value_get_double(&val_b);
-  g_value_unset (&val_a);
-  g_value_unset (&val_b);
+  dist_a = cc_timezone_location_get_dist(a);
+  dist_b = cc_timezone_location_get_dist(b);
   if (dist_a > dist_b)
     return 1;
 
@@ -933,13 +920,6 @@ get_loc_for_xy (GtkWidget * widget, gint x, gint y)
   gint width, height;
   GtkAllocation alloc;
   CcTimezoneLocation* location;
-
-  GValue glon = {0};
-  GValue glat = {0};
-  GValue gdist = {0};
-  g_value_init (&glon, G_TYPE_DOUBLE);
-  g_value_init (&glat, G_TYPE_DOUBLE);
-  g_value_init (&gdist, G_TYPE_DOUBLE);
 
   rowstride = priv->visible_map_rowstride;
   pixels = priv->visible_map_pixels;
@@ -986,16 +966,13 @@ get_loc_for_xy (GtkWidget * widget, gint x, gint y)
           gdouble pointx, pointy, dx, dy;
           CcTimezoneLocation *loc = array->pdata[i];
 
-          g_object_get_property(G_OBJECT (loc), "longitude", &glon);
-          g_object_get_property(G_OBJECT (loc), "latitude", &glat);
-          pointx = convert_longtitude_to_x (g_value_get_double(&glon), width);
-          pointy = convert_latitude_to_y (g_value_get_double(&glat), height);
+          pointx = convert_longtitude_to_x (cc_timezone_location_get_longitude(loc), width);
+          pointy = convert_latitude_to_y (cc_timezone_location_get_latitude(loc), height);
 
           dx = pointx - x;
           dy = pointy - y;
 
-          g_value_set_double(&gdist, (gdouble) dx * dx + dy * dy);
-          g_object_set_property(G_OBJECT (loc), "dist", &gdist);
+          cc_timezone_location_set_dist(loc, (gdouble) dx * dx + dy * dy);
           priv->distances = g_list_prepend (priv->distances, loc);
         }
       priv->distances = g_list_sort (priv->distances, (GCompareFunc) sort_locations);
@@ -1003,10 +980,6 @@ get_loc_for_xy (GtkWidget * widget, gint x, gint y)
       priv->previous_x = x;
       priv->previous_y = y;
     }
-
-    g_value_unset (&glon);
-    g_value_unset (&glat);
-    g_value_unset (&gdist);
 
     return location;
 }
@@ -1143,8 +1116,6 @@ cc_timezone_map_set_timezone (CcTimezoneMap *map,
   GPtrArray *locations;
   guint i;
   char *real_tz;
-  GValue zone = {0};
-  g_value_init (&zone, G_TYPE_STRING);
 
   real_tz = g_hash_table_lookup (map->priv->alias_db, timezone);
 
@@ -1153,9 +1124,8 @@ cc_timezone_map_set_timezone (CcTimezoneMap *map,
   for (i = 0; i < locations->len; i++)
     {
       CcTimezoneLocation *loc = locations->pdata[i];
-      g_object_get_property(G_OBJECT (loc), "zone", &zone);
 
-      if (!g_strcmp0 (g_value_get_string(&zone), real_tz ? real_tz : timezone))
+      if (!g_strcmp0 (cc_timezone_location_get_zone(loc), real_tz ? real_tz : timezone))
         {
           set_location (map, loc);
           break;
@@ -1163,7 +1133,6 @@ cc_timezone_map_set_timezone (CcTimezoneMap *map,
     }
 
   gtk_widget_queue_draw (GTK_WIDGET (map));
-  g_value_unset (&zone);
 }
 
 void

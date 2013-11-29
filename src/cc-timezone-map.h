@@ -25,6 +25,7 @@
 
 #include <gtk/gtk.h>
 #include "tz.h"
+#include "cc-timezone-location.h"
 
 G_BEGIN_DECLS
 
