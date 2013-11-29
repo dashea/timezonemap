@@ -1226,6 +1226,14 @@ cc_timezone_map_set_watermark (CcTimezoneMap *map, const gchar * watermark)
   gtk_widget_queue_draw (GTK_WIDGET (map));
 }
 
+/**
+ * cc_timezone_map_get_location:
+ * @map: A #CcTimezoneMap
+ *
+ * Returns the current location set for the map.
+ *
+ * Returns: (transfer none): the map location.
+ */
 CcTimezoneLocation *
 cc_timezone_map_get_location (CcTimezoneMap *map)
 {

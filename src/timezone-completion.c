@@ -442,7 +442,7 @@ get_descendent (GtkWidget * parent, GType type)
   return NULL;
 }
 
-/**
+/*
  * The popup window and its GtkTreeView are private to our parent completion
  * object.  We can't get access to discover if there is a highlighted item or
  * even if the window is showing right now.  So this is a super hack to find
