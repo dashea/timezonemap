@@ -87,6 +87,7 @@ libtimezonemap_la_SOURCES = $(libtimezonemap_GISOURCES) $(libtimezonemap_NONGISO
 # that users do "#include <timezonemap/tz.h>" instead of "#include <tz.h>"
 timezonemapincludesdir = $(includedir)/timezonemap/timezonemap
 timezonemapincludes_HEADERS = \
+  cc-timezone-location.h \
   cc-timezone-map.h \
   timezone-completion.h \
   tz.h
