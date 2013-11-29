@@ -305,7 +305,6 @@ void parse_file (const char * filename,
     if (!fh) 
       {
         g_warning ("Could not open *%s*\n", filename);
-        fclose (fh);
         return;
       }
 
