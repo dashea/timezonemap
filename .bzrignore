@@ -19,3 +19,4 @@ m4/*.m4
 *.la
 src/test-timezone
 src/timezonemap.pc
+INSTALL
