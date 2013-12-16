@@ -60,6 +60,7 @@ struct _CcTimezoneMapPrivate
   gint olsen_map_rowstride;
 
   gdouble selected_offset;
+  gboolean show_offset;
 
   gchar *watermark;
 
@@ -76,6 +77,11 @@ enum
 {
   LOCATION_CHANGED,
   LAST_SIGNAL
+};
+
+enum {
+  PROP_0,
+  PROP_SELECTED_OFFSET,
 };
 
 static guint signals[LAST_SIGNAL];
@@ -513,8 +519,12 @@ cc_timezone_map_get_property (GObject    *object,
                               GValue     *value,
                               GParamSpec *pspec)
 {
+  CcTimezoneMap *map = CC_TIMEZONE_MAP(object);
   switch (property_id)
     {
+    case PROP_SELECTED_OFFSET:
+      g_value_set_double(value, map->priv->selected_offset);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     }
@@ -526,8 +536,12 @@ cc_timezone_map_set_property (GObject      *object,
                               const GValue *value,
                               GParamSpec   *pspec)
 {
+  CcTimezoneMap *map = CC_TIMEZONE_MAP(object);
   switch (property_id)
     {
+    case PROP_SELECTED_OFFSET:
+      cc_timezone_map_set_selected_offset(map, g_value_get_double(value));
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     }
@@ -783,7 +797,7 @@ cc_timezone_map_draw (GtkWidget *widget,
     cairo_stroke(cr);
   }
 
-  if (!priv->location) {
+  if (!priv->show_offset) {
     return TRUE;
   }
 
@@ -813,6 +827,10 @@ cc_timezone_map_draw (GtkWidget *widget,
       g_object_unref (hilight);
       g_object_unref (orig_hilight);
     }
+
+  if (!priv->location) {
+    return TRUE;
+  }
 
   /* load pin icon */
   pin = gdk_pixbuf_new_from_file (DATADIR "/pin.png", &err);
@@ -860,6 +878,14 @@ cc_timezone_map_class_init (CcTimezoneMapClass *klass)
   widget_class->realize = cc_timezone_map_realize;
   widget_class->draw = cc_timezone_map_draw;
 
+  g_object_class_install_property(G_OBJECT_CLASS(klass),
+                                  PROP_SELECTED_OFFSET,
+                                  g_param_spec_string ("selected-offset",
+                                      "Selected offset",
+                                      "The selected offset from GMT in hours",
+                                      "",
+                                      G_PARAM_READWRITE));
+
   signals[LOCATION_CHANGED] = g_signal_new ("location-changed",
                                             CC_TYPE_TIMEZONE_MAP,
                                             G_SIGNAL_RUN_FIRST,
@@ -902,10 +928,12 @@ set_location (CcTimezoneMap *map,
     info = tz_info_from_location (priv->location);
     priv->selected_offset = tz_location_get_utc_offset (priv->location)
         / (60.0*60.0) + ((info->daylight) ? -1.0 : 0.0);
+    priv->show_offset = TRUE;
     tz_info_free (info);
   }
   else
   {
+    priv->show_offset = FALSE;
     priv->selected_offset = 0.0;
   }
 
@@ -1099,6 +1127,9 @@ cc_timezone_map_init (CcTimezoneMap *self)
   priv->olsen_map_pixels = gdk_pixbuf_get_pixels (priv->olsen_map);
   priv->olsen_map_rowstride = gdk_pixbuf_get_rowstride (priv->olsen_map);
 
+  priv->selected_offset = 0.0;
+  priv->show_offset = FALSE;
+
   priv->tzdb = tz_load_db ();
 
   g_signal_connect (self, "button-press-event", G_CALLBACK (button_press_event),
@@ -1227,5 +1258,35 @@ void
 cc_timezone_map_clear_location (CcTimezoneMap *map)
 {
   set_location(map, NULL);
+  gtk_widget_queue_draw (GTK_WIDGET (map));
+}
+
+/**
+ * cc_timezone_map_get_selected_offset:
+ * @map: A #CcTimezoneMap
+ *
+ * Returns the currently selected offset in hours from GMT.
+ *
+ * Returns: The selected offset.
+ *
+ */
+gdouble cc_timezone_map_get_selected_offset(CcTimezoneMap *map)
+{
+  return map->priv->selected_offset;
+}
+
+/**
+ * cc_timezone_map_set_selected_offset:
+ * @map: A #CcTimezoneMap
+ * @offset: The offset from GMT in hours
+ *
+ * Set the currently selected offset for the map and redraw the highlighted
+ * time zone.
+ */
+void cc_timezone_map_set_selected_offset (CcTimezoneMap *map, gdouble offset)
+{
+  map->priv->selected_offset = offset;
+  map->priv->show_offset = TRUE;
+  g_object_notify(G_OBJECT(map), "selected-offset");
   gtk_widget_queue_draw (GTK_WIDGET (map));
 }

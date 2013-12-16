@@ -83,6 +83,8 @@ const gchar * cc_timezone_map_get_timezone_at_coords (CcTimezoneMap *map,
                                                       gdouble lon, gdouble lat);
 CcTimezoneLocation * cc_timezone_map_get_location (CcTimezoneMap *map);
 void cc_timezone_map_clear_location (CcTimezoneMap *map);
+gdouble cc_timezone_map_get_selected_offset(CcTimezoneMap *map);
+void cc_timezone_map_set_selected_offset (CcTimezoneMap *map, gdouble offset);
 
 G_END_DECLS
 
