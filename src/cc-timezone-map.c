@@ -897,14 +897,20 @@ set_location (CcTimezoneMap *map,
 
   priv->location = location;
 
-  info = tz_info_from_location (priv->location);
-
-  priv->selected_offset = tz_location_get_utc_offset (priv->location)
-    / (60.0*60.0) + ((info->daylight) ? -1.0 : 0.0);
+  if (priv->location)
+  {
+    info = tz_info_from_location (priv->location);
+    priv->selected_offset = tz_location_get_utc_offset (priv->location)
+        / (60.0*60.0) + ((info->daylight) ? -1.0 : 0.0);
+    tz_info_free (info);
+  }
+  else
+  {
+    priv->selected_offset = 0.0;
+  }
 
   g_signal_emit (map, signals[LOCATION_CHANGED], 0, priv->location);
 
-  tz_info_free (info);
 }
 
 static CcTimezoneLocation *
@@ -1207,4 +1213,19 @@ CcTimezoneLocation *
 cc_timezone_map_get_location (CcTimezoneMap *map)
 {
   return map->priv->location;
+}
+
+/**
+ * cc_timezone_map_clear_location:
+ * @map: A #CcTimezoneMap
+ *
+ * Clear the location currently set for the #CcTimezoneMap. This will remove
+ * the highlight and reset the map to its original state.
+ *
+ */
+void
+cc_timezone_map_clear_location (CcTimezoneMap *map)
+{
+  set_location(map, NULL);
+  gtk_widget_queue_draw (GTK_WIDGET (map));
 }
