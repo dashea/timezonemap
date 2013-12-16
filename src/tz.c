@@ -332,7 +332,7 @@ tz_location_set_locally (CcTimezoneLocation *loc)
     return correction;
 }
 
-    TzInfo *
+TzInfo *
 tz_info_from_location (CcTimezoneLocation *loc)
 {
     TzInfo *tzinfo;
