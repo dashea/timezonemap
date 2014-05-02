@@ -6,8 +6,10 @@ include /usr/share/cdbs/1/rules/autoreconf.mk
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/gnome.mk
 
+DEB_CONFIGURE_EXTRA_FLAGS += --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)
+
 DEB_CONFIGURE_FLAGS_gtk3 = --with-gtk=3
-DEB_CONFIGURE_EXTRA_FLAGS = --disable-static --enable-introspection
+DEB_CONFIGURE_EXTRA_FLAGS += --disable-static --enable-introspection
 
 # To generate dependencies tight enough so that consumers of the object
 # properties can access them.
