@@ -1,4 +1,4 @@
-libtimezonemap (0.4.2) UNRELEASED; urgency=medium
+libtimezonemap (0.4.2) utopic; urgency=medium
 
   * Convert to multiarch.
     + Use compat 9 and pass multiarch flags to configure
@@ -7,7 +7,7 @@ libtimezonemap (0.4.2) UNRELEASED; urgency=medium
     + Install files into MA locations
   * Bump S-V to 3.9.5, no changes required.
 
- -- Iain Lane <iain.lane@canonical.com>  Fri, 02 May 2014 10:26:49 +0100
+ -- Iain Lane <iain.lane@canonical.com>  Fri, 02 May 2014 11:14:20 +0100
 
 libtimezonemap (0.4.1) trusty; urgency=low
 
