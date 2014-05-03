@@ -42,6 +42,8 @@ Package: libtimezonemap-data
 Architecture: all
 Depends: ${misc:Depends}
 Multi-Arch: foreign
+Breaks: libtimezonemap1 (<< 0.4.2)
+Replaces: libtimezonemap1 (<< 0.4.2)
 Description: GTK+3 timezone map widget - data files
  Timezone map widget for GTK+3
  .
