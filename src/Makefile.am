@@ -3,7 +3,6 @@ CLEANFILES =
 uidir = $(pkgdatadir)/ui
 dist_ui_DATA = \
 	data/bg.png \
-	data/cc.png \
 	data/olsen_map.png \
 	data/pin.png \
 	data/timezone_0.png \
