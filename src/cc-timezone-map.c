@@ -999,6 +999,8 @@ get_loc_for_xy (GtkWidget * widget, gint x, gint y)
 
       location = (CcTimezoneLocation*) priv->distances->data;
     } else {
+      GList *node;
+
       g_list_free (priv->distances_head);
       priv->distances_head = NULL;
       for (i = 0; i < array->len; i++)
@@ -1016,6 +1018,25 @@ get_loc_for_xy (GtkWidget * widget, gint x, gint y)
           priv->distances_head = g_list_prepend (priv->distances_head, loc);
         }
       priv->distances_head = g_list_sort (priv->distances_head, (GCompareFunc) sort_locations);
+
+      /* Remove locations from the list with a distance of greater than 50px,
+       * so that repeated clicks cycle through a smaller area instead of
+       * jumping all over the map. Start with the second element to ensure
+       * that at least one element stays in the list.
+       */
+      node = priv->distances_head->next;
+      while (node != NULL)
+        {
+          if (cc_timezone_location_get_dist(node->data) > (50 * 50))
+            {
+              /* Cut the list off here */
+              node->prev->next = NULL;
+              g_list_free(node);
+            }
+
+          node = g_list_next(node);
+        }
+
       priv->distances = priv->distances_head;
       location = (CcTimezoneLocation*) priv->distances->data;
       priv->previous_x = x;
