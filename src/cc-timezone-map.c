@@ -68,6 +68,8 @@ struct _CcTimezoneMapPrivate
   CcTimezoneLocation *location;
   GHashTable *alias_db;
   GList *distances;
+  /* Store the head of the list separately so it can be freed later */
+  GList *distances_head;
 
   gint previous_x;
   gint previous_y;
@@ -594,9 +596,10 @@ cc_timezone_map_dispose (GObject *object)
       g_hash_table_destroy (priv->alias_db);
       priv->alias_db = NULL;
     }
-  if (priv->distances)
+  if (priv->distances_head)
     {
-      g_list_free (priv->distances);
+      g_list_free (priv->distances_head);
+      priv->distances_head = NULL;
       priv->distances = NULL;
     }
 
@@ -991,10 +994,13 @@ get_loc_for_xy (GtkWidget * widget, gint x, gint y)
   if (x == priv->previous_x && y == priv->previous_y) 
     {
       priv->distances = g_list_next (priv->distances);
+      if (!priv->distances)
+          priv->distances = priv->distances_head;
+
       location = (CcTimezoneLocation*) priv->distances->data;
     } else {
-      g_list_free (priv->distances);
-      priv->distances = NULL;
+      g_list_free (priv->distances_head);
+      priv->distances_head = NULL;
       for (i = 0; i < array->len; i++)
         {
           gdouble pointx, pointy, dx, dy;
@@ -1007,9 +1013,10 @@ get_loc_for_xy (GtkWidget * widget, gint x, gint y)
           dy = pointy - y;
 
           cc_timezone_location_set_dist(loc, (gdouble) dx * dx + dy * dy);
-          priv->distances = g_list_prepend (priv->distances, loc);
+          priv->distances_head = g_list_prepend (priv->distances_head, loc);
         }
-      priv->distances = g_list_sort (priv->distances, (GCompareFunc) sort_locations);
+      priv->distances_head = g_list_sort (priv->distances_head, (GCompareFunc) sort_locations);
+      priv->distances = priv->distances_head;
       location = (CcTimezoneLocation*) priv->distances->data;
       priv->previous_x = x;
       priv->previous_y = y;
