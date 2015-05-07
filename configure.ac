@@ -1,5 +1,5 @@
 AC_INIT([libtimezonemap],
-        [1.0.0],
+        [0.4.4],
         [http://bugs.launchpad.net/libtimezonemap],
         [libtimezonemap],
         [http://launchpad.net/libtimezonemap])
