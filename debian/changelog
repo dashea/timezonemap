@@ -1,3 +1,11 @@
+libtimezonemap (0.4.4) UNRELEASED; urgency=medium
+
+  [ David Shea ]
+  * Update the SVG, generated new map images, and cleaned up a couple other
+    image-related issues.
+
+ -- Iain Lane <iain.lane@canonical.com>  Thu, 07 May 2015 16:42:56 +0100
+
 libtimezonemap (0.4.3) utopic; urgency=medium
 
   * Add missing Breaks/Replaces for the -data split (LP: #1315452)
