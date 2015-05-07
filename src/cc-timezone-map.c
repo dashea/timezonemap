@@ -532,6 +532,7 @@ cc_timezone_map_dispose (GObject *object)
       g_hash_table_destroy (priv->alias_db);
       priv->alias_db = NULL;
     }
+
   if (priv->distances_head)
     {
       g_list_free (priv->distances_head);
