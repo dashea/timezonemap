@@ -26,6 +26,7 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 #include <glib/gi18n.h>
+#include <libsoup/soup.h>
 #include "timezone-completion.h"
 #include "tz.h"
 
@@ -45,6 +46,7 @@ struct _CcTimezoneCompletionPrivate
   GCancellable * cancel;
   gchar *        request_text;
   GHashTable *   request_table;
+  SoupSession *  soup_session;
 };
 
 #define GEONAME_URL "http://geoname-lookup.ubuntu.com/?query=%s&release=%s&lang=%s"
@@ -133,10 +135,6 @@ json_parse_ready (GObject *object, GAsyncResult *res, gpointer user_data)
   const gchar * prev_country = NULL;
 
   json_parser_load_from_stream_finish (JSON_PARSER (object), res, &error);
-
-  if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED) && priv->cancel) {
-    g_cancellable_reset (priv->cancel);
-  }
 
   if (error != NULL) 
     {
@@ -271,16 +269,11 @@ geonames_data_ready (GObject *object, GAsyncResult *res, gpointer user_data)
   CcTimezoneCompletion * completion = CC_TIMEZONE_COMPLETION (user_data);
   CcTimezoneCompletionPrivate * priv = completion->priv;
   GError * error = NULL;
-  GFileInputStream * stream;
+  GInputStream * stream;
+  SoupMessage *message;
 
-  stream = g_file_read_finish (G_FILE (object), res, &error);
-
-  if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED) && priv->cancel)
-    {
-      g_cancellable_reset (priv->cancel);
-    }
-
-  if (error != NULL)
+  stream = soup_request_send_finish (SOUP_REQUEST (object), res, &error);
+  if (stream == NULL)
     {
       if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         save_and_use_model (completion, priv->initial_model);
@@ -290,9 +283,24 @@ geonames_data_ready (GObject *object, GAsyncResult *res, gpointer user_data)
       return;
     }
 
-  JsonParser * parser = json_parser_new ();
-  json_parser_load_from_stream_async (parser, G_INPUT_STREAM (stream), priv->cancel,
-                                      json_parse_ready, user_data);
+  message = soup_request_http_get_message (SOUP_REQUEST_HTTP (object));
+  if (message->status_code == SOUP_STATUS_OK)
+    {
+      JsonParser *parser;
+
+      parser = json_parser_new ();
+      json_parser_load_from_stream_async (parser, stream, priv->cancel, json_parse_ready, user_data);
+
+      g_object_unref (parser);
+    }
+  else
+    {
+      g_warning ("Unable to fetch geonames (server responded with: %u %s)",
+                 message->status_code, message->reason_phrase);
+    }
+
+  g_object_unref (message);
+  g_object_unref (stream);
 }
 
 /* Returns message locale, with possible country info too like en_US */
@@ -354,6 +362,8 @@ static gboolean
 request_zones (CcTimezoneCompletion * completion)
 {
   CcTimezoneCompletionPrivate * priv = completion->priv;
+  SoupRequest *req;
+  GError *error = NULL;
 
   priv->queued_request = 0;
 
@@ -366,7 +376,8 @@ request_zones (CcTimezoneCompletion * completion)
   if (priv->cancel)
     {
       g_cancellable_cancel (priv->cancel);
-      g_cancellable_reset (priv->cancel);
+      g_object_unref (priv->cancel);
+      priv->cancel = g_cancellable_new ();
     }
   g_free (priv->request_text);
 
@@ -380,12 +391,19 @@ request_zones (CcTimezoneCompletion * completion)
   g_free (locale);
   g_free (escaped);
 
-  GFile * file =  g_file_new_for_uri (url);
+  req = soup_session_request (priv->soup_session, url, &error);
+  if (req)
+    {
+      soup_request_send_async (req, priv->cancel, geonames_data_ready, completion);
+      g_object_unref (req);
+    }
+  else
+    {
+      g_warning ("%s", error->message);
+      g_error_free (error);
+    }
+
   g_free (url);
-
-  g_file_read_async (file, G_PRIORITY_DEFAULT, priv->cancel,
-                     geonames_data_ready, completion);
-
   return FALSE;
 }
 
@@ -678,6 +696,8 @@ cc_timezone_completion_init (CcTimezoneCompletion * self)
   gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (self), cell, TRUE);
   gtk_cell_layout_set_cell_data_func (GTK_CELL_LAYOUT (self), cell, data_func, NULL, NULL);
 
+  priv->soup_session = soup_session_new ();
+
   return;
 }
 
@@ -740,6 +760,8 @@ cc_timezone_completion_dispose (GObject * object)
       g_hash_table_destroy (priv->request_table);
       priv->request_table = NULL;
     }
+
+  g_clear_object (&priv->soup_session);
 
   return;
 }

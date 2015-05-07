@@ -5,6 +5,10 @@ libtimezonemap (0.4.4) UNRELEASED; urgency=medium
     image-related issues.
   * Constrain the location when clicking in the same spot.
 
+  [ Lars Uebernickel ]
+  * Port to libsoup directly for geoname requests, fix some memory leaks and
+    do not reuse GCancellables. (LP: #1440157)
+
  -- Iain Lane <iain.lane@canonical.com>  Thu, 07 May 2015 16:42:56 +0100
 
 libtimezonemap (0.4.3) utopic; urgency=medium
