@@ -1,0 +1,495 @@
+2015-05-07  Iain Lane  <iain.lane@canonical.com>
+
+	Merge lp:~larsu/timezonemap/lp1440157
+
+2015-05-07  Lars Uebernickel  <lars.uebernickel@canonical.com>
+
+	timezone-completion: use libsoup for geoname lookups
+	
+	Gio wasn't made for handling a lot of quick http api requests. It spawns
+	another process and keeps "mounts" of those requests around indefinitely (see
+	GNOME bug #509609).
+	
+	Just use libsoup directly.
+	
+	(Also fix some memory leaks and keeping the connection open by failing to unref
+	the input stream.)
+
+2015-05-07  Lars Uebernickel  <lars.uebernickel@canonical.com>
+
+	timezone-completion: don't use g_cancellable_reset()
+	
+	There might still be oustanding async operations for the same cancellable, for
+	which g_cancellable_is_cancelled() should continue returning FALSE.
+	
+	Create a new cancellable for new operations instead. This is recommended by the
+	documentation for GCancellable.
+
+2015-05-07  Iain Lane  <iain.lane@canonical.com>
+
+	Update changelog
+
+2015-05-07  Iain Lane  <iain.lane@canonical.com>
+
+	Merge lp:~dshea/timezonemap/location-cycle
+
+2015-03-24  David Shea  <dshea@redhat.com>
+
+	Cycle through a smaller list of map locations on repeated clicks.
+	
+	Cycling through the entire map causes erratic jumps between locations,
+	especially if starting in a sparsely populated area. Limit the candidate
+	locations to those within 50px of the mouse click, or the nearest
+	location if no location is within 50px.
+
+2015-03-24  David Shea  <dshea@redhat.com>
+
+	Fix a memory leak and potential crash with the locations list
+	
+	Store the head of the locations list separately so that the references
+	to list elements are not lost as the list is iterated over. If the end
+	of the list of reached, restart at the beginning.
+
+2015-05-07  Iain Lane  <iain.lane@canonical.com>
+
+	Update the changelog
+
+2015-05-07  Iain Lane  <iain.lane@canonical.com>
+
+	Merge lp:~dshea/timezonemap/pixmaps-update
+	
+	Update the latest data, regenerate map, add docs
+
+2015-05-01  David Shea  <dshea@redhat.com>
+
+	Removed timezone_-5.5.
+	
+	There is no UTC-5:30 zone, and the file itself is a misnamed copy of
+	timezone_-9.5.png.
+
+2015-05-01  David Shea  <dshea@redhat.com>
+
+	Import the latest data from geonames.org.
+
+2015-05-01  David Shea  <dshea@redhat.com>
+
+	Regenerated the map background and overlays
+
+2015-05-01  David Shea  <dshea@redhat.com>
+
+	Added some instructions for how to generate new PNGs
+	
+	I'm not sure if this is the best way to do this, but it's reproducible.
+	Also added a description of the other data files in src/data.
+
+2015-05-01  David Shea  <dshea@redhat.com>
+
+	Cleaned and updated the time zones SVG.
+	
+	The SVG map had some issues, and had not been updated in at least a
+	decade.
+	
+	Removed layers:
+	- s0, which appears to be a scratch layer
+	- edit, same
+	- tz_export, which looks incomplete and should really be generated
+	from the other layers
+	- tz_color_codes, ditto
+	- bg, since it doesn't contain anything and it was messing up the page
+	size
+	
+	Also removed an extra Iceland that was in layer m1 for some reason.
+	
+	Added new layers for half and quarter hour zones, except -04:30 which
+	was already there.
+	
+	Retraced portions of the map using the August 2013 time zone map from
+	the CIA World Factbook, which is in the public domain.  Also made some
+	additional changes not included in the CIA map. The larger changes
+	include:
+	
+	- Updated time zones in Brazil for changes made in 2008 and 2012
+	- Updated the Russian time zones, mostly visible on the eastern end
+	- Moved Sri Lanka from +06:00 to +05:30, changed in 2006
+	- Moved Chile from -04:00 to -03:00 after their change to year-round
+	DST in 2015.
+
+2015-03-24  David Shea  <dshea@redhat.com>
+
+	Remove the color codes map.
+	
+	cc.png is used to map locations on a map (usually mouse clicks) to time zone
+	offsets. However, in every case except one, the offset set by get_loc_for_xy()
+	is immediately overwritten by set_location(). For the exception case
+	(cc_timezone_map_get_timezone_at_coords), having the selected_offset property
+	change during the call is an unexpected side effect.
+	
+	Furthermore, the data in the color_codes array was not entirely in sync with
+	the data in cc.png (e.g., no color_codes entry for UTC+14), and the borders
+	between zones in cc.png are feathered instead of being zones of a single pixel
+	value, so clicks around the borders would result in no zone being selected. If
+	cc.png is ever revived, it needs to be regenerated from the SVG source.
+
+2014-05-03  Dimitri John Ledkov  <dimitri.ledkov@canonical.com>
+
+	releasing package libtimezonemap version 0.4.3
+
+2014-05-02  Iain Lane  <iain.lane@canonical.com>
+
+	releasing package libtimezonemap version 0.4.2
+
+2014-05-02  Iain Lane  <iain.lane@canonical.com>
+
+	* Convert to multiarch.
+	+ Use compat 9 and pass multiarch flags to configure
+	+ Split arch-independent data out into a -data package
+	+ Make library package Multi-Arch: same
+	+ Install files into MA locations
+	* Bump S-V to 3.9.5, no changes required.
+
+2013-12-16  Iain Lane  <iain.lane@canonical.com>
+
+	Merge r41 from lp:~dshea/timezonemap/trunk to expose a selected-offset property
+
+2013-12-16  Iain Lane  <iain.lane@canonical.com>
+
+	Fix some indentation
+
+2013-12-16  Iain Lane  <iain.lane@canonical.com>
+
+	Merge r40 from lp:~dshea/timezonemap/trunk
+
+2013-11-29  Iain Lane  <iain.lane@canonical.com>
+
+	Don't call g_type_init() on glib >= 2.35; it's deprecated
+
+2013-11-29  Iain Lane  <iain.lane@canonical.com>
+
+	Set en_name correctly
+
+2013-11-29  Iain Lane  <iain.lane@canonical.com>
+
+	Add cc-timezone-location.h to timezonemapincludes_HEADERS so it gets installed
+
+2013-11-29  Iain Lane  <iain.lane@canonical.com>
+
+	Merge r35 from lp:~dshea/timezonemap/trunk
+	
+	Move CcTimezoneLocation out into its own file, add getters & setters.
+
+2013-11-14  David Shea  <dshea@redhat.com>
+
+	Moved CcTimezoneLocation into its own file.
+	
+	Mixing GObject and non-GObject code in tz.c confuses g-ir-scanner and
+	adds a lot non-introspectable identifiers to the .gir file.
+	
+	Added get and set functions for the CcTimezoneLocation properties.
+
+2013-11-29  Iain Lane  <iain.lane@canonical.com>
+
+	Merge r37 from lp:~dshea/timezonemap/trunk
+	
+	Turn on g-ir-scanner warnings & fix an errant comment
+
+2013-11-29  Iain Lane  <iain.lane@canonical.com>
+
+	Merge r34 from lp:~dshea/libtimezonemap/trunk
+	
+	Fix a g_strdup → g_free error.
+	
+	Copies incoming strings when settings properties.
+
+2013-11-14  David Shea  <dshea@redhat.com>
+
+	Create local copies of string properties.
+	
+	The string values passed to set_property are owned by the caller, so we
+	need to create new copies of the strings to store in the private data
+	structure.
+	
+	The dispose method already had code to free the private strings, but was
+	missing a check for the en_name property: added one.
+
+2013-11-29  Iain Lane  <iain.lane@canonical.com>
+
+	Merge r39 from lp:~dshea/timezonemap/trunk
+	
+	Ignore INSTALL too; generated file
+
+2013-11-29  Iain Lane  <iain.lane@canonical.com>
+
+	Merge r38 from lp:~dshea/timezonemap/trunk
+	
+	bzrignore some generated files and remove generated INSTALL from the repository
+
+2013-11-29  Iain Lane  <iain.lane@canonical.com>
+
+	Merge r36 from lp:~dshea/timezonemap/trunk
+	
+	Don't try to close a NULL file pointer.
+
+2013-11-29  Iain Lane  <iain.lane@canonical.com>
+
+	Merge r33 from lp:~dshea/timezonemap/trunk
+	
+	Fixes the FSF's address.
+
+2013-11-14  David Shea  <dshea@redhat.com>
+
+	Update the GPL comments with the new FSF address.
+	
+	The Free Software Foundation's address is now at 51 Franklin St. The
+	rest of the GPL v2 boilerplate comment is unchanged.
+
+2013-11-05  Dmitrijs Ledkovs  <dmitrijs.ledkovs@canonical.com>
+
+	Merge whitespace branch
+
+2013-11-05  Iain Lane  <iain.lane@canonical.com>
+
+	Make whitespace and indentation consistent
+
+2013-11-05  Dmitrijs Ledkovs  <dmitrijs.ledkovs@canonical.com>
+
+	releasing package libtimezonemap version 0.4.1
+
+2013-11-05  Dmitrijs Ledkovs  <dmitrijs.ledkovs@canonical.com>
+
+	Include countryInfo and admin1Codes from geonames (in addition to
+	cities15000 already shipped from there) and use them to provide "state"
+	and "full_country" properties.
+
+2013-11-05  Iain Lane  <iain.lane@canonical.com>
+
+	More whitespace
+	
+	Cleanup branch coming
+
+2013-11-05  Iain Lane  <iain.lane@canonical.com>
+
+	It's already destroyed; don't unref it too.
+
+2013-11-05  Iain Lane  <iain.lane@canonical.com>
+
+	Fix some whitespace
+
+2013-11-05  Iain Lane  <iain.lane@canonical.com>
+
+	Use dh_makeshlibs -V to generate tighter deps for property consumers
+
+2013-11-05  Iain Lane  <iain.lane@canonical.com>
+
+	Install new .txt files
+
+2013-11-05  Iain Lane  <iain.lane@canonical.com>
+
+	Free state too
+
+2013-11-05  Iain Lane  <iain.lane@canonical.com>
+
+	Changelog
+
+2013-11-05  Iain Lane  <iain.lane@canonical.com>
+
+	Fix whitespace
+
+2013-11-05  Iain Lane  <iain@orangesquash.org.uk>
+
+	Add contryInfo.txt
+
+2013-11-01  Iain Lane  <iain@orangesquash.org.uk>
+
+	Add a `full_country' property containing the English full name of the location's country
+
+2013-11-01  Iain Lane  <iain@orangesquash.org.uk>
+
+	Use g_new
+
+2013-11-01  Iain Lane  <iain@orangesquash.org.uk>
+
+	Abstract out the parsing
+
+2013-10-31  Iain Lane  <iain@orangesquash.org.uk>
+
+	Add state property
+	
+	The cities15000 file contains a short name referencing the state, the full
+	version of which is in admin1Codes.txt provided by geonames.org. Parse this.
+
+2013-10-10  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	releasing package libtimezonemap version 0.4.0.2
+
+2013-10-10  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Allow using the tz data file from the build tree. Fixes amd64
+	builds.
+
+2013-07-23  Dmitrijs Ledkovs  <dmitrijs.ledkovs@canonical.com>
+
+	releasing version 0.4.0.1
+
+2013-07-23  Iain Lane  <iain.lane@canonical.com>
+
+	Add Depends from the -dev package to packages the .pcfile Requires.
+
+2013-03-28  Dmitrijs Ledkovs  <dmitrijs.ledkovs@canonical.com>
+
+	releasing version 0.4.0
+
+2013-03-27  Dmitrijs Ledkovs  <dmitrijs.ledkovs@canonical.com>
+
+	* Bump standards version to 3.9.4.
+	* Fix gir scanner options.
+
+2013-03-27  Dmitrijs Ledkovs  <dmitrijs.ledkovs@canonical.com>
+
+	add todo
+
+2013-03-27  Dmitrijs Ledkovs  <dmitrijs.ledkovs@canonical.com>
+
+	* Simplfy setting location
+	* Use latitude/longitude for local cities as well (LP: #892370)
+	* Add m4 directory to prevent aclocal from complaining.
+	* Include cities with greater than 15000 people locally.
+	* Add original timezone svg map, thanks to Otto for finding it.
+
+2012-11-06  James M Leddy  <james.leddy@canonical.com>
+
+	* Simplfy setting location
+	* Use latitude/longitude for local cities as well (LP: #892370)
+
+2012-08-21  James M Leddy  <james.leddy@canonical.com>
+
+	* Add m4 directory to prevent aclocal from complaining.
+	* Include cities with greater than 15000 people locally.
+
+2013-03-27  Dmitrijs Ledkovs  <dmitrijs.ledkovs@canonical.com>
+
+	Add the original traced svg
+
+2012-02-27  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	releasing version 0.3.2
+
+2012-02-27  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Cycle through timezones on mouse clicks within a 10 pixel square box
+	of the previous click (LP: #905754).
+
+2012-02-02  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Use AC_CHECK_LIBM. Thanks Loic Minier!
+
+2011-12-01  Loïc Minier  <loic.minier@ubuntu.com>
+
+	Fix missing -lm causing FTBFS with latest gtk+ (which used to pass a
+	superfluous -lm via pkg-config until recently).
+
+2012-01-09  Michael Terry  <michael.terry@canonical.com>
+
+	Ship m4/ directory, which accidentally got dropped when making the
+	tarball for 0.3.  Fixes FTBFS 
+
+2012-01-09  Michael Terry  <michael.terry@canonical.com>
+
+	* Fix crash when freeing CcTimezoneLocation objects
+	* Ship a .pc file
+	* Ship include headers
+	* Move .gir file from gir1.2-* package to *-dev package
+	* Add CcTimezoneCompletion from indicator-datetime
+	* Link with libm.
+
+2012-01-09  Michael Terry  <michael.terry@canonical.com>
+
+	add missing libjson-glib-dev dependency to debian/control
+
+2012-01-09  Michael Terry  <michael.terry@canonical.com>
+
+	and fix breaks/replaces version to be 0.3
+
+2012-01-09  Michael Terry  <michael.terry@canonical.com>
+
+	and add in TimezoneCompletion from indicator-datetime
+
+2012-01-09  Michael Terry  <michael.terry@canonical.com>
+
+	ship header and .pc files
+
+2012-01-09  Michael Terry  <michael.terry@canonical.com>
+
+	fix crash when trying to unref strings
+
+2012-01-09  Michael Terry  <michael.terry@canonical.com>
+
+	merge in changes from Ubuntu packaging
+
+2011-08-09  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Expose TzLocations as GObjects.
+
+2011-08-02  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Clean up.
+
+2011-08-01  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Turn TimezoneLocation into a GObject.
+
+2011-08-09  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	releasing version 0.1
+
+2011-08-03  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Fix up control
+
+2011-08-03  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Fix up copyright
+
+2011-07-29  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Put just the library in the library package.
+
+2011-07-29  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Remove unneeded deps.
+
+2011-07-29  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Put data in the right place.
+
+2011-07-29  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Get rid of the separate GTK+2 branch. Entirely unnecessary.
+
+2011-07-28  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Install the GI files to the proper location.
+
+2011-07-28  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Call it TimezoneMap, put things in the right places.
+
+2011-07-28  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Move test stuff back into src
+
+2011-07-28  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Add standard files.
+
+2011-07-28  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Missing GIO required version.
+
+2011-07-28  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Dump i18n.
+
+2011-07-28  Evan Dandrea  <evan.dandrea@canonical.com>
+
+	Initial commit.
+
