@@ -134,10 +134,6 @@ json_parse_ready (GObject *object, GAsyncResult *res, gpointer user_data)
 
   json_parser_load_from_stream_finish (JSON_PARSER (object), res, &error);
 
-  if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED) && priv->cancel) {
-    g_cancellable_reset (priv->cancel);
-  }
-
   if (error != NULL) 
     {
       if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
@@ -275,11 +271,6 @@ geonames_data_ready (GObject *object, GAsyncResult *res, gpointer user_data)
 
   stream = g_file_read_finish (G_FILE (object), res, &error);
 
-  if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED) && priv->cancel)
-    {
-      g_cancellable_reset (priv->cancel);
-    }
-
   if (error != NULL)
     {
       if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
@@ -366,7 +357,8 @@ request_zones (CcTimezoneCompletion * completion)
   if (priv->cancel)
     {
       g_cancellable_cancel (priv->cancel);
-      g_cancellable_reset (priv->cancel);
+      g_object_unref (priv->cancel);
+      priv->cancel = g_cancellable_new ();
     }
   g_free (priv->request_text);
 
