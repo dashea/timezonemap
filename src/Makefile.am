@@ -13,7 +13,6 @@ dist_ui_DATA = \
 	data/timezone_1.png \
 	data/timezone_-11.png \
 	data/timezone_11.png \
-	data/timezone_11.5.png \
 	data/timezone_12.png \
 	data/timezone_12.75.png \
 	data/timezone_13.png \
@@ -38,6 +37,7 @@ dist_ui_DATA = \
 	data/timezone_7.png \
 	data/timezone_-8.png \
 	data/timezone_8.png \
+	data/timezone_8.5.png \
 	data/timezone_-9.png \
 	data/timezone_9.png \
 	data/timezone_-9.5.png \
