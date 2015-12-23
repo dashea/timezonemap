@@ -1,11 +1,11 @@
-libtimezonemap (0.4.5) UNRELEASED; urgency=medium
+libtimezonemap (0.4.5) xenial; urgency=medium
 
   [ David Shea ]
   * Update the SVG, and re-generated map images. Notable changes:
     - Image for UTC-11:30 (timezone_11.5.png) is no longer needed.
     - New image for North Korea time zone (timezone_8.5.png).
 
- -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Wed, 23 Dec 2015 13:31:13 -0500
+ -- Mathieu Trudel-Lapierre <mathieu-tl@ubuntu.com>  Wed, 23 Dec 2015 13:53:19 -0500
 
 libtimezonemap (0.4.4) wily; urgency=medium
 
