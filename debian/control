@@ -9,7 +9,7 @@ Build-Depends: cdbs,
                gir1.2-glib-2.0,
                gir1.2-gtk-3.0,
                intltool (>= 0.35.0),
-               libglib2.0-dev (>= 2.25.0),
+               libglib2.0-dev (>= 2.26.0),
                libgtk-3-dev (>= 3.1.4),
                libcairo2-dev (>= 1.10),
                libjson-glib-dev,
@@ -57,7 +57,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, 
          ${misc:Depends},
          libtimezonemap1 (= ${binary:Version}),
-         libglib2.0-dev (>= 2.25.0),
+         libglib2.0-dev (>= 2.26.0),
          libgtk-3-dev (>= 3.1.4),
          libjson-glib-dev
 Replaces: gir1.2-timezonemap-1.0 (<< 0.3)
