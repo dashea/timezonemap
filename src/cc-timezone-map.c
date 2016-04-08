@@ -940,6 +940,7 @@ get_loc_for_xy (GtkWidget * widget, gint x, gint y)
               /* Cut the list off here */
               node->prev->next = NULL;
               g_list_free(node);
+              break;
             }
 
           node = g_list_next(node);
