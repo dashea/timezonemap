@@ -40,7 +40,7 @@ static int compare_country_names (const void *a, const void *b);
 static void sort_locations_by_country (GPtrArray *locations);
 static const gchar * tz_data_file_get (const gchar *env, const gchar *defaultfile);
 
-void parse_file (const char * filename,
+static void parse_file (const char * filename,
                  const guint ncolumns,
                  GFunc func,
                  gpointer user_data)
@@ -65,7 +65,7 @@ void parse_file (const char * filename,
     fclose (fh);
 }
 
-void parse_admin1Codes (gpointer parsed_data,
+static void parse_admin1Codes (gpointer parsed_data,
                         gpointer user_data)
 {
     gchar ** parsed_data_v = (gchar **) parsed_data;
@@ -79,7 +79,7 @@ void parse_admin1Codes (gpointer parsed_data,
 
 }
 
-void parse_countrycode (gpointer parsed_data,
+static void parse_countrycode (gpointer parsed_data,
                         gpointer user_data)
 {
     gchar ** parsed_data_v = (gchar **) parsed_data;
@@ -98,7 +98,7 @@ typedef struct Triple {
     gpointer third;
 } Triple;
 
-void parse_cities15000 (gpointer parsed_data, 
+static void parse_cities15000 (gpointer parsed_data,
                         gpointer user_data)
 {
     gchar ** parsed_data_v = (gchar **) parsed_data;
