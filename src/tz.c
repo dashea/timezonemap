@@ -41,7 +41,7 @@ static float convert_pos (gchar *pos, int digits);
 #endif
 static int compare_country_names (const void *a, const void *b);
 static void sort_locations_by_country (GPtrArray *locations);
-static gchar * tz_data_file_get (gchar *env, gchar *defaultfile);
+static const gchar * tz_data_file_get (const gchar *env, const gchar *defaultfile);
 
 void parse_file (const char * filename,
                  const guint ncolumns,
@@ -179,7 +179,7 @@ void parse_cities15000 (gpointer parsed_data,
 TzDB *
 tz_load_db (void)
 {
-    gchar *tz_data_file, *admin1_file, *country_file;
+    const gchar *tz_data_file, *admin1_file, *country_file;
     TzDB *tz_db;
     char buf[4096];
 
@@ -217,22 +217,18 @@ tz_load_db (void)
     tz_db = g_new0 (TzDB, 1);
     tz_db->locations = g_ptr_array_new ();
 
-    Triple * triple = g_new (Triple, 1);
-    triple->first = tz_db->locations;
-    triple->second = stateHash;
-    triple->third = countryHash;
+    Triple triple;
+    triple.first = tz_db->locations;
+    triple.second = stateHash;
+    triple.third = countryHash;
 
-    parse_file (tz_data_file, 19, parse_cities15000, triple);
+    parse_file (tz_data_file, 19, parse_cities15000, &triple);
 
     g_hash_table_destroy (stateHash);
     g_hash_table_destroy (countryHash);
-    triple->second = NULL;
-    triple->third = NULL;
 
     /* now sort by country */
     sort_locations_by_country (tz_db->locations);
-
-    g_free (tz_data_file);
 
     return tz_db;
 }
@@ -391,14 +387,14 @@ tz_info_free (TzInfo *tzinfo)
  * Private functions *
  * ----------------- */
 
-static gchar *
-tz_data_file_get (gchar *env, gchar *defaultfile)
+static const gchar *
+tz_data_file_get (const gchar *env, const gchar *defaultfile)
 {
     /* Allow passing this in at runtime, to support loading it from the build
      * tree during tests. */
     const gchar * filename = g_getenv (env);
 
-    return filename ? g_strdup (filename) : g_strdup (defaultfile);
+    return filename ? filename : defaultfile;
 }
 
 #ifdef __sun
