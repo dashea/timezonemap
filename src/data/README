@@ -17,12 +17,6 @@ backward
   This file lists links between current time zone names and obsolete time zone
   names. It comes from the tzdata at https://www.iana.org/time-zones
 
-olsen_map.png
-  This is a map of the tzdata timezones, with each zone encoded as a RGBA
-  value. The data source is probably the shapefiles provided at
-  http://efele.net/maps/tz/world/, but the origin and how to update it is
-  otherwise something of a mystery.
-
 pin.png
   The location pin. Nothing fancy.
 

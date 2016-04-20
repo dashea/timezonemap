@@ -58,12 +58,6 @@ struct _CcTimezoneMapPrivate
    * given size. */
   GHashTable *highlight_table;
 
-  GdkPixbuf *olsen_map;
-
-  gint olsen_map_channels;
-  guchar *olsen_map_pixels;
-  gint olsen_map_rowstride;
-
   gdouble selected_offset;
   gboolean show_offset;
 
@@ -92,389 +86,6 @@ enum {
 };
 
 static guint signals[LAST_SIGNAL];
-
-static const gchar * olsen_map_timezones[] = {
-    "Africa/Abidjan",
-    "Africa/Accra",
-    "Africa/Addis_Ababa",
-    "Africa/Algiers",
-    "Africa/Asmara",
-    "Africa/Bamako",
-    "Africa/Bangui",
-    "Africa/Banjul",
-    "Africa/Bissau",
-    "Africa/Blantyre",
-    "Africa/Brazzaville",
-    "Africa/Bujumbura",
-    "Africa/Cairo",
-    "Africa/Casablanca",
-    "Africa/Conakry",
-    "Africa/Dakar",
-    "Africa/Dar_es_Salaam",
-    "Africa/Djibouti",
-    "Africa/Douala",
-    "Africa/El_Aaiun",
-    "Africa/Freetown",
-    "Africa/Gaborone",
-    "Africa/Harare",
-    "Africa/Johannesburg",
-    "Africa/Kampala",
-    "Africa/Khartoum",
-    "Africa/Kigali",
-    "Africa/Kinshasa",
-    "Africa/Lagos",
-    "Africa/Libreville",
-    "Africa/Lome",
-    "Africa/Luanda",
-    "Africa/Lubumbashi",
-    "Africa/Lusaka",
-    "Africa/Malabo",
-    "Africa/Maputo",
-    "Africa/Maseru",
-    "Africa/Mbabane",
-    "Africa/Mogadishu",
-    "Africa/Monrovia",
-    "Africa/Nairobi",
-    "Africa/Ndjamena",
-    "Africa/Niamey",
-    "Africa/Nouakchott",
-    "Africa/Ouagadougou",
-    "Africa/Porto-Novo",
-    "Africa/Sao_Tome",
-    "Africa/Tripoli",
-    "Africa/Tunis",
-    "Africa/Windhoek",
-    "America/Adak",
-    "America/Anguilla",
-    "America/Antigua",
-    "America/Araguaina",
-    "America/Argentina/Buenos_Aires",
-    "America/Argentina/Catamarca",
-    "America/Argentina/Cordoba",
-    "America/Argentina/Jujuy",
-    "America/Argentina/La_Rioja",
-    "America/Argentina/Mendoza",
-    "America/Argentina/Rio_Gallegos",
-    "America/Argentina/San_Juan",
-    "America/Argentina/San_Luis",
-    "America/Argentina/Tucuman",
-    "America/Argentina/Ushuaia",
-    "America/Aruba",
-    "America/Asuncion",
-    "America/Atikokan",
-    "America/Bahia",
-    "America/Barbados",
-    "America/Belem",
-    "America/Belize",
-    "America/Blanc-Sablon",
-    "America/Boa_Vista",
-    "America/Bogota",
-    "America/Boise",
-    "America/Cambridge_Bay",
-    "America/Campo_Grande",
-    "America/Cancun",
-    "America/Caracas",
-    "America/Cayenne",
-    "America/Cayman",
-    "America/Chicago",
-    "America/Chihuahua",
-    "America/Coral_Harbour",
-    "America/Costa_Rica",
-    "America/Cuiaba",
-    "America/Curacao",
-    "America/Dawson",
-    "America/Dawson_Creek",
-    "America/Denver",
-    "America/Dominica",
-    "America/Edmonton",
-    "America/Eirunepe",
-    "America/El_Salvador",
-    "America/Fortaleza",
-    "America/Glace_Bay",
-    "America/Goose_Bay",
-    "America/Grand_Turk",
-    "America/Grenada",
-    "America/Guadeloupe",
-    "America/Guatemala",
-    "America/Guayaquil",
-    "America/Guyana",
-    "America/Halifax",
-    "America/Havana",
-    "America/Hermosillo",
-    "America/Indiana/Indianapolis",
-    "America/Indiana/Knox",
-    "America/Indiana/Marengo",
-    "America/Indiana/Petersburg",
-    "America/Indiana/Vevay",
-    "America/Indiana/Vincennes",
-    "America/Indiana/Winamac",
-    "America/Inuvik",
-    "America/Iqaluit",
-    "America/Jamaica",
-    "America/Juneau",
-    "America/Kentucky/Louisville",
-    "America/Kentucky/Monticello",
-    "America/La_Paz",
-    "America/Lima",
-    "America/Los_Angeles",
-    "America/Maceio",
-    "America/Managua",
-    "America/Manaus",
-    "America/Marigot",
-    "America/Martinique",
-    "America/Mazatlan",
-    "America/Menominee",
-    "America/Merida",
-    "America/Mexico_City",
-    "America/Miquelon",
-    "America/Moncton",
-    "America/Monterrey",
-    "America/Montevideo",
-    "America/Montreal",
-    "America/Montserrat",
-    "America/Nassau",
-    "America/New_York",
-    "America/Nipigon",
-    "America/Noronha",
-    "America/North_Dakota/Center",
-    "America/North_Dakota/Salem",
-    "America/Panama",
-    "America/Pangnirtung",
-    "America/Paramaribo",
-    "America/Phoenix",
-    "America/Port-au-Prince",
-    "America/Port_of_Spain",
-    "America/Porto_Velho",
-    "America/Puerto_Rico",
-    "America/Rainy_River",
-    "America/Rankin_Inlet",
-    "America/Recife",
-    "America/Regina",
-    "America/Resolute",
-    "America/Rio_Branco",
-    "America/Santarem",
-    "America/Santiago",
-    "America/Santo_Domingo",
-    "America/Sao_Paulo",
-    "America/St_Barthelemy",
-    "America/St_Johns",
-    "America/St_Kitts",
-    "America/St_Lucia",
-    "America/St_Thomas",
-    "America/St_Vincent",
-    "America/Tegucigalpa",
-    "America/Thunder_Bay",
-    "America/Tijuana",
-    "America/Toronto",
-    "America/Tortola",
-    "America/Vancouver",
-    "America/Whitehorse",
-    "America/Winnipeg",
-    "America/Yellowknife",
-    "Ameriica/Swift_Current",
-    "Arctic/Longyearbyen",
-    "Asia/Aden",
-    "Asia/Almaty",
-    "Asia/Amman",
-    "Asia/Anadyr",
-    "Asia/Aqtau",
-    "Asia/Aqtobe",
-    "Asia/Ashgabat",
-    "Asia/Baghdad",
-    "Asia/Bahrain",
-    "Asia/Baku",
-    "Asia/Bangkok",
-    "Asia/Beirut",
-    "Asia/Bishkek",
-    "Asia/Brunei",
-    "Asia/Choibalsan",
-    "Asia/Chongqing",
-    "Asia/Colombo",
-    "Asia/Damascus",
-    "Asia/Dhaka",
-    "Asia/Dili",
-    "Asia/Dubai",
-    "Asia/Dushanbe",
-    "Asia/Gaza",
-    "Asia/Harbin",
-    "Asia/Ho_Chi_Minh",
-    "Asia/Hong_Kong",
-    "Asia/Hovd",
-    "Asia/Irkutsk",
-    "Asia/Jakarta",
-    "Asia/Jayapura",
-    "Asia/Jerusalem",
-    "Asia/Kabul",
-    "Asia/Kamchatka",
-    "Asia/Karachi",
-    "Asia/Kashgar",
-    "Asia/Katmandu",
-    "Asia/Kolkata",
-    "Asia/Krasnoyarsk",
-    "Asia/Kuala_Lumpur",
-    "Asia/Kuching",
-    "Asia/Kuwait",
-    "Asia/Macau",
-    "Asia/Magadan",
-    "Asia/Makassar",
-    "Asia/Manila",
-    "Asia/Muscat",
-    "Asia/Nicosia",
-    "Asia/Novosibirsk",
-    "Asia/Omsk",
-    "Asia/Oral",
-    "Asia/Phnom_Penh",
-    "Asia/Pontianak",
-    "Asia/Pyongyang",
-    "Asia/Qatar",
-    "Asia/Qyzylorda",
-    "Asia/Rangoon",
-    "Asia/Riyadh",
-    "Asia/Sakhalin",
-    "Asia/Samarkand",
-    "Asia/Seoul",
-    "Asia/Shanghai",
-    "Asia/Singapore",
-    "Asia/Taipei",
-    "Asia/Tashkent",
-    "Asia/Tbilisi",
-    "Asia/Tehran",
-    "Asia/Thimphu",
-    "Asia/Tokyo",
-    "Asia/Ulaanbaatar",
-    "Asia/Urumqi",
-    "Asia/Vientiane",
-    "Asia/Vladivostok",
-    "Asia/Yakutsk",
-    "Asia/Yekaterinburg",
-    "Asia/Yerevan",
-    "Atlantic/Azores",
-    "Atlantic/Bermuda",
-    "Atlantic/Canary",
-    "Atlantic/Cape_Verde",
-    "Atlantic/Faroe",
-    "Atlantic/Madeira",
-    "Atlantic/Reykjavik",
-    "Atlantic/South_Georgia",
-    "Atlantic/St_Helena",
-    "Atlantic/Stanley",
-    "Australia/Adelaide",
-    "Australia/Brisbane",
-    "Australia/Broken_Hill",
-    "Australia/Currie",
-    "Australia/Darwin",
-    "Australia/Eucla",
-    "Australia/Hobart",
-    "Australia/Lindeman",
-    "Australia/Lord_Howe",
-    "Australia/Melbourne",
-    "Australia/Perth",
-    "Australia/Sydney",
-    "Europe/Amsterdam",
-    "Europe/Andorra",
-    "Europe/Athens",
-    "Europe/Belgrade",
-    "Europe/Berlin",
-    "Europe/Bratislava",
-    "Europe/Brussels",
-    "Europe/Bucharest",
-    "Europe/Budapest",
-    "Europe/Chisinau",
-    "Europe/Copenhagen",
-    "Europe/Dublin",
-    "Europe/Gibraltar",
-    "Europe/Guernsey",
-    "Europe/Helsinki",
-    "Europe/Isle_of_Man",
-    "Europe/Istanbul",
-    "Europe/Jersey",
-    "Europe/Kaliningrad",
-    "Europe/Kiev",
-    "Europe/Lisbon",
-    "Europe/Ljubljana",
-    "Europe/London",
-    "Europe/Luxembourg",
-    "Europe/Madrid",
-    "Europe/Malta",
-    "Europe/Marienhamn",
-    "Europe/Minsk",
-    "Europe/Monaco",
-    "Europe/Moscow",
-    "Europe/Oslo",
-    "Europe/Paris",
-    "Europe/Podgorica",
-    "Europe/Prague",
-    "Europe/Riga",
-    "Europe/Rome",
-    "Europe/Samara",
-    "Europe/San_Marino",
-    "Europe/Sarajevo",
-    "Europe/Simferopol",
-    "Europe/Skopje",
-    "Europe/Sofia",
-    "Europe/Stockholm",
-    "Europe/Tallinn",
-    "Europe/Tirane",
-    "Europe/Uzhgorod",
-    "Europe/Vaduz",
-    "Europe/Vatican",
-    "Europe/Vienna",
-    "Europe/Vilnius",
-    "Europe/Volgograd",
-    "Europe/Warsaw",
-    "Europe/Zagreb",
-    "Europe/Zaporozhye",
-    "Europe/Zurich",
-    "Indian/Antananarivo",
-    "Indian/Chagos",
-    "Indian/Christmas",
-    "Indian/Cocos",
-    "Indian/Comoro",
-    "Indian/Kerguelen",
-    "Indian/Mahe",
-    "Indian/Maldives",
-    "Indian/Mauritius",
-    "Indian/Mayotte",
-    "Indian/Reunion",
-    "Pacific/Apia",
-    "Pacific/Auckland",
-    "Pacific/Chatham",
-    "Pacific/Easter",
-    "Pacific/Efate",
-    "Pacific/Enderbury",
-    "Pacific/Fakaofo",
-    "Pacific/Fiji",
-    "Pacific/Funafuti",
-    "Pacific/Galapagos",
-    "Pacific/Gambier",
-    "Pacific/Guadalcanal",
-    "Pacific/Guam",
-    "Pacific/Honolulu",
-    "Pacific/Johnston",
-    "Pacific/Kiritimati",
-    "Pacific/Kosrae",
-    "Pacific/Kwajalein",
-    "Pacific/Majuro",
-    "Pacific/Marquesas",
-    "Pacific/Midway",
-    "Pacific/Nauru",
-    "Pacific/Niue",
-    "Pacific/Norfolk",
-    "Pacific/Noumea",
-    "Pacific/Pago_Pago",
-    "Pacific/Palau",
-    "Pacific/Pitcairn",
-    "Pacific/Ponape",
-    "Pacific/Port_Moresby",
-    "Pacific/Rarotonga",
-    "Pacific/Saipan",
-    "Pacific/Tahiti",
-    "Pacific/Tarawa",
-    "Pacific/Tongatapu",
-    "Pacific/Truk",
-    "Pacific/Wake",
-    "Pacific/Wallis"
-};
 
 /* Allow datadir to be overridden in the environment */
 static const gchar *
@@ -549,16 +160,6 @@ cc_timezone_map_dispose (GObject *object)
     {
       g_hash_table_destroy (priv->highlight_table);
       priv->highlight_table = NULL;
-    }
-
-  if (priv->olsen_map)
-    {
-      g_object_unref (priv->olsen_map);
-      priv->olsen_map = NULL;
-
-      priv->olsen_map_channels = 0;
-      priv->olsen_map_pixels = NULL;
-      priv->olsen_map_rowstride = 0;
     }
 
   if (priv->alias_db)
@@ -1013,8 +614,6 @@ static CcTimezoneLocation *
 get_loc_for_xy (GtkWidget * widget, gint x, gint y)
 {
   CcTimezoneMapPrivate *priv = CC_TIMEZONE_MAP (widget)->priv;
-  guchar r, g, b, a;
-  gint rowstride;
   gint i;
 
   const GPtrArray *array;
@@ -1189,26 +788,10 @@ cc_timezone_map_init (CcTimezoneMap *self)
       g_clear_error (&err);
     }
 
-  priv->background = NULL;
-  priv->highlight = NULL;
-
   priv->highlight_table = g_hash_table_new_full (g_double_hash,
                                                  g_double_equal,
                                                  g_free,
                                                  (GDestroyNotify) cairo_pattern_destroy);
-
-  file = g_strdup_printf ("%s/olsen_map.png", get_datadir ());
-  priv->olsen_map = gdk_pixbuf_new_from_file (file, &err);
-  g_free (file);
-  if (!priv->olsen_map)
-    {
-      g_warning ("Could not load olsen map: %s",
-                 (err) ? err->message : "Unknown error");
-      g_clear_error (&err);
-    }
-  priv->olsen_map_channels = gdk_pixbuf_get_n_channels (priv->olsen_map);
-  priv->olsen_map_pixels = gdk_pixbuf_get_pixels (priv->olsen_map);
-  priv->olsen_map_rowstride = gdk_pixbuf_get_rowstride (priv->olsen_map);
 
   priv->selected_offset = 0.0;
   priv->show_offset = FALSE;
@@ -1276,31 +859,31 @@ cc_timezone_map_set_coords (CcTimezoneMap *map, gdouble lon, gdouble lat)
 const gchar *
 cc_timezone_map_get_timezone_at_coords (CcTimezoneMap *map, gdouble lon, gdouble lat)
 {
-  gint x = (int)(2048.0 / 360.0 * (180.0 + lon));
-  gint y = (int)(1024.0 / 180.0 * (90.0 - lat));
-  gint offset = map->priv->olsen_map_rowstride * y + x * map->priv->olsen_map_channels;
-  guchar color0 = map->priv->olsen_map_pixels[offset];
-  guchar color1 = map->priv->olsen_map_pixels[offset + 1];
-  gint zone = ((color0 & 248) << 1) + ((color1 >>4) & 15);
+  CcTimezoneMapPrivate *priv = map->priv;
+  gdouble min_dist = G_MAXDOUBLE;
+  CcTimezoneLocation *min_loc = NULL;
+  int i;
+  const GPtrArray *array;
 
-  const gchar * city = NULL;
-  if (zone < G_N_ELEMENTS(olsen_map_timezones))
-    city = olsen_map_timezones[zone];
+  array = tz_get_locations(priv->tzdb);
 
-  if (city != NULL)
+  /* Find the location closest to the specified lat/lng */
+  for (i = 0; i < array->len; i++)
     {
-      return city;
-    } else {
-      GtkAllocation alloc;
-      GValue val_zone = {0};
-      g_value_init (&val_zone, G_TYPE_STRING);
-      gtk_widget_get_allocation (GTK_WIDGET (map), &alloc);
-      x = convert_longtitude_to_x(lon, alloc.width);
-      y = convert_latitude_to_y(lat, alloc.height);
-      CcTimezoneLocation * loc = get_loc_for_xy(GTK_WIDGET (map), x, y);
-      g_value_unset (&val_zone);
-      return g_value_get_string(&val_zone);
+      gdouble dlat, dlon, dist;
+      CcTimezoneLocation *loc = array->pdata[i];
+
+      dlat = lat - cc_timezone_location_get_latitude(loc);
+      dlon = lon - cc_timezone_location_get_longitude(loc);
+      dist = (dlat * dlat) + (dlon * dlon);
+      if (dist < min_dist)
+        {
+          min_dist = dist;
+          min_loc = loc;
+        }
     }
+
+  return cc_timezone_location_get_zone(min_loc);
 }
 
 void

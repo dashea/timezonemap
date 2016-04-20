@@ -2,7 +2,6 @@ CLEANFILES =
 
 uidir = $(pkgdatadir)
 dist_ui_DATA = \
-	data/olsen_map.png \
 	data/pin.png \
 	data/time_zones_countryInfo-orig.svg \
 	data/admin1Codes.txt \
