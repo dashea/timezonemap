@@ -14,6 +14,7 @@ Build-Depends: cdbs,
                libcairo2-dev (>= 1.10),
                libjson-glib-dev,
                libsoup2.4-dev (>= 2.42.0),
+               librsvg2-2,
                dh-autoreconf
 Standards-Version: 3.9.5
 Vcs-Bzr: http://bazaar.launchpad.net/~timezonemap-team/timezonemap/trunk
@@ -59,6 +60,7 @@ Depends: ${shlibs:Depends},
          libtimezonemap1 (= ${binary:Version}),
          libglib2.0-dev (>= 2.25.0),
          libgtk-3-dev (>= 3.1.4),
+         librsvg2-dev,
          libjson-glib-dev
 Replaces: gir1.2-timezonemap-1.0 (<< 0.3)
 Breaks: gir1.2-timezonemap-1.0 (<< 0.3)

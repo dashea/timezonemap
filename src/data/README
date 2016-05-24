@@ -21,45 +21,29 @@ time_zones_countryInfo-orig.svg
   The master SVG used to generate the map images. It is lovingly hand-updated,
   mostly by using inkscape to trace over whatever map image is convenient.
 
-bg.png
-  The background of the map, based on the master SVG with some color changes.
-  It can be generated with the following steps:
+  Each layer must also have an id corresponding to the layer name.
 
-  * Open time_zones_countryInfo-orig.svg in inkscape
-  * Right click over an ocean area, choose "Select This"
-  * Edit -> Select Same -> Fill and Stroke
-  * Edit -> Copy
-  * Create a new, blank document with File -> New
-  * In the blank document, Edit -> Paste In Place
-  * Open the Fill and Stroke dialog with Object -> Fill and Stroke
-  * Under the Fill tab, change the RGBA value to 95a9c8ff
-  * Go back to the original SVG. Right click a land area, "Select This"
-  * Edit -> Select Same -> Fill and Stroke
-  * Edit -> Copy
-  * Switch to the new document, Edit -> Paste In Place
-  * In Fill and Stroke, under the Fill tab, change RGBA to ffffffff
-  * Edit -> Deselect
-  * File -> Document Properties...
-  * Under the "Custom Size" heading, expand "Resize page to content"
-  * Click "Resize page to drawing or selection"
-  * File -> Export PNG Image...
-  * Choose "Page" as the Export area, and set the image size to 800x410
-  * Set the filename to bg.png under "Export As..."
-  * Click Export
-
-timezone_*.png
-  These are the overlay images displayed for a timezone selection. Each one is
-  generated from a layer in time_zones_countryInfo-orig.svg. To generate new
-  images:
+  The background layer is generated from the individual timezone layers. Here
+  is one way to do it:
 
   * Open time_zones_countryInfo-orig.svg in inkscape
   * Open the layers dialog with Layer -> Layers...
-  * For each layer:
-
-    - Right click the layer, choose "Show/hide other layers"
-    - File -> Export PNG Image...
-    - Choose "Page" as the export area and 800x410 as the image size
-    - Set the filename in Export As...  For example, m3 becomes
-      timezone\_-3.png, and p9-5 becomes timezone_9.5.png. m0 becomes
-      timezone_0.png
-    - Click "Export"
+  * Click "background"
+  * Click the eye icon to make the layer visible
+  * Edit -> Select All
+  * Edit -> Delete
+  * Right click over an ocean area, choose "Select This"
+  * Edit -> Select Same -> Fill and Stroke
+  * Edit -> Copy
+  * Click "background" in the Layers dialog again
+  * Edit -> Paste in Place
+  * Open the Fill and Stroke dialog with Object -> Fill and Stroke
+  * Under the Fill tab, change the RGBA value to 95a9c8ff
+  * Layer -> "Show/hide current layer" to hide the background layer
+  * Right click a land area, "Select This"
+  * Edit -> Select Same -> Fill and Stroke
+  * Edit -> Copy
+  * Click "background" in the Layers dialog again
+  * Layer -> "Show/hide current layer" to show the background layer
+  * Edit -> Paste in Place
+  * In Fill and Stroke, under the Fill tab, change RGBA to ffffffff

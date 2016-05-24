@@ -1,5 +1,7 @@
 #include <config.h>
 #include <locale.h>
+#include <librsvg/rsvg.h>
+#include <math.h>
 
 #include "tz.h"
 
@@ -10,6 +12,8 @@ int main (int argc, char **argv)
     guint i;
     char *pixmap_dir;
     int retval = 0;
+    RsvgHandle *svg;
+    gchar *path;
 
         setlocale (LC_ALL, "");
 
@@ -29,35 +33,42 @@ int main (int argc, char **argv)
     GValue zone = {0};
     g_value_init(&zone, G_TYPE_STRING);
 
+    path = g_build_filename (pixmap_dir, "time_zones_countryInfo-orig.svg", NULL);
+    svg = rsvg_handle_new_from_file (path, NULL);
+    if (!svg)
+      {
+        g_message ("File '%s' cannot be read", path);
+        g_free (path);
+        return 1;
+      }
+    g_free (path);
+
     db = tz_load_db ();
     locs = tz_get_locations (db);
     for (i = 0; i < locs->len ; i++)
       {
         CcTimezoneLocation *loc = locs->pdata[i];
+        gchar *layer_name;
 
         TzInfo *info;
-        char *filename, *path;
         gdouble selected_offset;
-        char buf[16];
         g_object_get_property(G_OBJECT (loc), "zone", &zone);
 
         info = tz_info_from_location (loc);
         selected_offset = tz_location_get_utc_offset (loc)
             / (60.0*60.0) + ((info->daylight) ? -1.0 : 0.0);
 
-        filename = g_strdup_printf ("timezone_%s.png",
-                                            g_ascii_formatd (buf, sizeof (buf),
-                                                             "%g", selected_offset));
-        path = g_build_filename (pixmap_dir, filename, NULL);
+        layer_name = g_strdup_printf("#%c%g",
+                                     selected_offset > 0 ? 'p' : 'm',
+                                     fabs(selected_offset));
 
-        if (g_file_test (path, G_FILE_TEST_IS_REGULAR) == FALSE)
+        if (rsvg_handle_has_sub (svg, layer_name) == FALSE)
           {
-            g_message ("File '%s' missing for zone '%s'", filename, g_value_get_string(&zone));
+            g_message ("Layer '%s' missing for zone '%s'", layer_name, g_value_get_string(&zone));
             retval = 1;
           }
 
-        g_free (filename);
-        g_free (path);
+        g_free(layer_name);
         tz_info_free (info);
       }
     tz_db_free (db);

@@ -57,7 +57,8 @@ AC_CHECK_LIBM
 PKG_CHECK_MODULES(LIBTIMEZONEMAP, gio-2.0 >= $GIO_REQUIRED_VERSION
                                   gtk+-3.0 >= $GTK3_REQUIRED_VERSION
                                   libsoup-2.4 >= $SOUP_REQUIRED_VERSION
-                                  json-glib-1.0)
+                                  json-glib-1.0
+                                  librsvg-2.0)
 LIBTIMEZONEMAP_LIBS="$LIBTIMEZONEMAP_LIBS $LIBM"
 
 GOBJECT_INTROSPECTION_CHECK([0.6.7])
