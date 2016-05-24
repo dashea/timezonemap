@@ -466,6 +466,18 @@ static const gchar * olsen_map_timezones[] = {
     "Pacific/Wallis"
 };
 
+/* Allow datadir to be overridden in the environment */
+static const gchar *
+get_datadir (void)
+{
+  const gchar *datadir = g_getenv("DATADIR");
+
+  if (datadir)
+    return datadir;
+  else
+    return DATADIR;
+}
+
 static void
 cc_timezone_map_get_property (GObject    *object,
                               guint       property_id,
@@ -731,7 +743,8 @@ cc_timezone_map_draw (GtkWidget *widget,
   }
 
   /* paint hilight */
-  file = g_strdup_printf (DATADIR "/timezone_%s.png",
+  file = g_strdup_printf ("%s/timezone_%s.png",
+                          get_datadir (),
                           g_ascii_formatd (buf, sizeof (buf),
                                            "%g", priv->selected_offset));
   orig_hilight = gdk_pixbuf_new_from_file (file, &err);
@@ -762,7 +775,9 @@ cc_timezone_map_draw (GtkWidget *widget,
   }
 
   /* load pin icon */
-  pin = gdk_pixbuf_new_from_file (DATADIR "/pin.png", &err);
+  file = g_strdup_printf ("%s/pin.png", get_datadir ());
+  pin = gdk_pixbuf_new_from_file (file, &err);
+  g_free (file);
 
   if (err)
     {
@@ -1026,14 +1041,16 @@ cc_timezone_map_init (CcTimezoneMap *self)
 {
   CcTimezoneMapPrivate *priv;
   GError *err = NULL;
+  gchar *file;
 
   priv = self->priv = TIMEZONE_MAP_PRIVATE (self);
 
   priv->previous_x = -1;
   priv->previous_y = -1;
 
-  priv->orig_background = gdk_pixbuf_new_from_file (DATADIR "/bg.png",
-                                                    &err);
+  file = g_strdup_printf ("%s/bg.png", get_datadir ());
+  priv->orig_background = gdk_pixbuf_new_from_file (file, &err);
+  g_free (file);
 
   if (!priv->orig_background)
     {
@@ -1042,8 +1059,9 @@ cc_timezone_map_init (CcTimezoneMap *self)
       g_clear_error (&err);
     }
 
-  priv->olsen_map = gdk_pixbuf_new_from_file (DATADIR "/olsen_map.png",
-                                              &err);
+  file = g_strdup_printf ("%s/olsen_map.png", get_datadir ());
+  priv->olsen_map = gdk_pixbuf_new_from_file (file, &err);
+  g_free (file);
   if (!priv->olsen_map)
     {
       g_warning ("Could not load olsen map: %s",
