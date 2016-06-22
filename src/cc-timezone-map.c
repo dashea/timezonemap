@@ -937,6 +937,39 @@ sort_locations (CcTimezoneLocation *a,
   return 0;
 }
 
+/* Return the UTC offset (in hours) for the standard (winter) time at a location */
+static gdouble
+get_location_offset (CcTimezoneLocation *location)
+{
+  const gchar *zone_name;
+  GTimeZone *zone;
+  gint interval;
+  gint64 curtime;
+  gint32 offset;
+
+  g_return_val_if_fail (location != NULL, 0);
+  zone_name = cc_timezone_location_get_zone (location);
+  g_return_val_if_fail (zone_name != NULL, 0);
+
+  zone = g_time_zone_new (zone_name);
+
+  /* Query the zone based on the current time, since otherwise the data
+   * may not make sense. */
+  curtime = g_get_real_time () / 1000;    /* convert to seconds */
+  interval = g_time_zone_find_interval (zone, G_TIME_TYPE_UNIVERSAL, curtime);
+
+  offset = g_time_zone_get_offset (zone, interval);
+  if (g_time_zone_is_dst (zone, interval))
+    {
+      /* Subtract an hour's worth of seconds to get the standard time offset */
+      offset -= (60 * 60);
+    }
+
+  g_time_zone_unref (zone);
+
+  return offset / (60.0 * 60.0);
+}
+
 static void
 set_location (CcTimezoneMap *map,
               CcTimezoneLocation    *location)
@@ -948,11 +981,8 @@ set_location (CcTimezoneMap *map,
 
   if (priv->location)
   {
-    info = tz_info_from_location (priv->location);
-    priv->selected_offset = tz_location_get_utc_offset (priv->location)
-        / (60.0*60.0) + ((info->daylight) ? -1.0 : 0.0);
+    priv->selected_offset = get_location_offset (priv->location);
     priv->show_offset = TRUE;
-    tz_info_free (info);
   }
   else
   {
@@ -1037,6 +1067,7 @@ get_loc_for_xy (GtkWidget * widget, gint x, gint y)
               /* Cut the list off here */
               node->prev->next = NULL;
               g_list_free(node);
+              break;
             }
 
           node = g_list_next(node);
