@@ -31,13 +31,13 @@
 #include "cc-timezone-location.h"
 
 #ifndef __sun
-#  define TZ_DATA_FILE "/usr/share/libtimezonemap/ui/cities15000.txt"
+#  define TZ_DATA_FILE "/usr/share/libtimezonemap/cities15000.txt"
 #else
 #  define TZ_DATA_FILE "/usr/share/lib/zoneinfo/tab/zone_sun.tab"
 #endif
 
-# define ADMIN1_FILE "/usr/share/libtimezonemap/ui/admin1Codes.txt"
-# define COUNTRY_FILE "/usr/share/libtimezonemap/ui/countryInfo.txt"
+# define ADMIN1_FILE "/usr/share/libtimezonemap/admin1Codes.txt"
+# define COUNTRY_FILE "/usr/share/libtimezonemap/countryInfo.txt"
 
 G_BEGIN_DECLS
 

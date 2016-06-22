@@ -1,6 +1,6 @@
 CLEANFILES = 
 
-uidir = $(pkgdatadir)/ui
+uidir = $(pkgdatadir)
 dist_ui_DATA = \
 	data/olsen_map.png \
 	data/pin.png \
@@ -10,15 +10,13 @@ dist_ui_DATA = \
 	data/countryInfo.txt
 
 tzdatadir = $(pkgdatadir)/
-dist_tzdata_DATA = backward
+dist_tzdata_DATA = data/backward
 
 pkgconfigdir = $(libdir)/pkgconfig
 dist_pkgconfig_DATA = timezonemap.pc
 
 AM_CPPFLAGS =						\
 	$(LIBTIMEZONEMAP_CFLAGS)				\
-	-DGNOMELOCALEDIR="\"$(datadir)/locale\""	\
-	-DGNOMECC_DATA_DIR="\"$(pkgdatadir)\""		\
 	-DDATADIR="\"$(uidir)\""			\
 	$(NULL)
 

@@ -1103,11 +1103,16 @@ load_backward_tz (CcTimezoneMap *self)
 {
   GError *error = NULL;
   char **lines, *contents;
+  gchar *file;
+  gboolean result;
   guint i;
 
   self->priv->alias_db = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
-  if (g_file_get_contents (GNOMECC_DATA_DIR "/backward", &contents, NULL, &error) == FALSE)
+  file = g_strdup_printf ("%s/backward", get_datadir ());
+  result = g_file_get_contents (file, &contents, NULL, &error);
+  g_free (file);
+  if (result == FALSE)
     {
       g_warning ("Failed to load 'backward' file: %s", error->message);
       return;
