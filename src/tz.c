@@ -36,9 +36,6 @@
 
 /* Forward declarations for private functions */
 
-#ifdef __sun
-static float convert_pos (gchar *pos, int digits);
-#endif
 static int compare_country_names (const void *a, const void *b);
 static void sort_locations_by_country (GPtrArray *locations);
 static const gchar * tz_data_file_get (const gchar *env, const gchar *defaultfile);
@@ -131,42 +128,10 @@ void parse_cities15000 (gpointer parsed_data,
     cc_timezone_location_set_latitude(loc, g_ascii_strtod(parsed_data_v[4], NULL));
     cc_timezone_location_set_longitude(loc, g_ascii_strtod(parsed_data_v[5], NULL));
 
-#ifdef __sun
-    gchar *latstr, *lngstr, *p;
-
-    latstr = g_strdup (parsed_data_v[1]);
-    p = latstr + 1;
-    while (*p != '-' && *p != '+') p++;
-    lngstr = g_strdup (p);
-    *p = '\0';
-
-    if (parsed_data_v[3] && *parsed_data_v[3] == '-' && parsed_data_v[4])
-        loc->comment = g_strdup (parsed_data_v[4]);
-
-    if (parsed_data_v[3] && *parsed_data_v[3] != '-' && !islower(loc->zone)) {
-        CcTimezoneLocation *locgrp;
-
-        /* duplicate entry */
-        locgrp = cc_timezone_location_new ();
-        locgrp->country = g_strdup (parsed_data_v[0]);
-        locgrp->en_name = NULL;
-        locgrp->zone = g_strdup (parsed_data_v[3]);
-        locgrp->latitude  = convert_pos (latstr, 2);
-        locgrp->longitude = convert_pos (lngstr, 3);
-        locgrp->comment = (parsed_data_v[4]) ? g_strdup (parsed_data_v[4]) : NULL;
-
-        g_ptr_array_add (ptr_array, (gpointer) locgrp);
-    }
-#else
     cc_timezone_location_set_comment(loc, NULL);
-#endif
 
     g_ptr_array_add (ptr_array, (gpointer) loc);
 
-#ifdef __sun
-    g_free (latstr);
-    g_free (lngstr);
-#endif
     g_strfreev (parsed_data_v);
 
     return;
@@ -350,7 +315,6 @@ tz_info_from_location (CcTimezoneLocation *loc)
     curtime = time (NULL);
     curzone = localtime (&curtime);
 
-#ifndef __sun
     /* Currently this solution doesnt seem to work - I get that */
     /* America/Phoenix uses daylight savings, which is wrong    */
     tzinfo->tzname_normal = g_strdup (curzone->tm_zone);
@@ -361,11 +325,6 @@ tz_info_from_location (CcTimezoneLocation *loc)
         tzinfo->tzname_daylight = NULL;
 
     tzinfo->utc_offset = curzone->tm_gmtoff;
-#else
-    tzinfo->tzname_normal = NULL;
-    tzinfo->tzname_daylight = NULL;
-    tzinfo->utc_offset = 0;
-#endif
 
     tzinfo->daylight = curzone->tm_isdst;
 
@@ -397,30 +356,8 @@ tz_data_file_get (const gchar *env, const gchar *defaultfile)
     return filename ? filename : defaultfile;
 }
 
-#ifdef __sun
-static float
-convert_pos (gchar *pos, int digits)
-{
-    gchar whole[10];
-    gchar *fraction;
-    gint i;
-    float t1, t2;
 
-    if (!pos || strlen(pos) < 4 || digits > 9) return 0.0;
-
-    for (i = 0; i < digits + 1; i++) whole[i] = pos[i];
-    whole[i] = '\0';
-    fraction = pos + digits + 1;
-
-    t1 = g_strtod (whole, NULL);
-    t2 = g_strtod (fraction, NULL);
-
-    if (t1 >= 0.0) return t1 + t2/pow (10.0, strlen(fraction));
-    else return t1 - t2/pow (10.0, strlen(fraction));
-}
-#endif
-
-    static int
+static int
 compare_country_names (const void *a, const void *b)
 {
     CcTimezoneLocation *tza = * (CcTimezoneLocation **) a;
