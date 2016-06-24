@@ -1,0 +1,5 @@
+7521902	Tabwakea Village	Tabwakea Village		2.01643	-157.48773	P	PPL	KI		02	KT			1881		6	Pacific/Kiritimati	2010-10-22
+8063344	Taiohae	Taiohae	Hakapehi	-8.91093	-140.09972	P	PPLA	PF		04				1224		23	Pacific/Marquesas	2013-08-10
+4032824	Tuku	Tuku	Te Tuku	-44.06667	-176.65	H	STM	NZ	NZ					0		101	Pacific/Chatham	1993-12-30
+7731015	Eucla Airport	Eucla Airport	EUC,Eucla Airport,YECL	-31.70674	128.87718	S	AIRP	AU		08	53080			0		7	Australia/Eucla	2014-11-09
+2159558	Lord Howe Island	Lord Howe Island	Ile Lord Howe,Lord Howe,Lord Howe Island,Lord Howe-eiland,Lord Howeoen,Lord Howeön,Lord-Howe-Eiland,Lord-Howe-Insel,Ostrov lorda Howa,Île Lord Howe,ロード・ハウ島	-31.55455	159.08246	T	ISL	AU		02				0		59	Australia/Lord_Howe	2015-06-01

@@ -5,9 +5,18 @@ dist_ui_DATA = \
 	data/olsen_map.png \
 	data/pin.png \
 	data/time_zones_countryInfo-orig.svg \
-	data/cities15000.txt \
 	data/admin1Codes.txt \
 	data/countryInfo.txt
+
+nodist_ui_DATA = \
+	data/citiesInfo.txt
+
+dist_noinst_DATA = \
+	data/cities15000.txt \
+	data/citiesExtra.txt
+
+data/citiesInfo.txt: data/cities15000.txt data/citiesExtra.txt
+	cat data/cities15000.txt data/citiesExtra.txt > $@
 
 tzdatadir = $(pkgdatadir)/
 dist_tzdata_DATA = data/backward
@@ -25,19 +34,24 @@ noinst_PROGRAMS = test-timezone
 
 all-local: check
 
-AM_TESTS_ENVIRONMENT = TZ_DATA_FILE=$(srcdir)/data/cities15000.txt ; \
+AM_TESTS_ENVIRONMENT = TZ_DATA_FILE=$(srcdir)/data/citiesInfo.txt ; \
 		       ADMIN1_FILE=$(srcdir)/data/admin1Codes.txt ; \
 		       COUNTRY_FILE=$(srcdir)/data/countryInfo.txt ; \
 		       DATADIR=$(srcdir)/data ; \
 		       export TZ_DATA_FILE ADMIN1_FILE COUNTRY_FILE DATADIR ;
 
-check_PROGRAMS = test-timezone
+check_PROGRAMS = test-timezone \
+		 test-clickability
 
 test_timezone_SOURCES = test-timezone.c
 test_timezone_LDADD = $(LIBTIMEZONEMAP_LIBS) -lm libtimezonemap.la
 test_timezone_CFLAGS = $(LIBTIMEZONEMAP_CFLAGS)
 
-TESTS = test-timezone
+test_clickability_SOURCES = test-clickability.c
+test_clickability_LDADD = $(LIBTIMEZONEMAP_LIBS) $(LIBXML_LIBS) libtimezonemap.la
+test_clickability_CFLAGS = $(LIBTIMEZONEMAP_CFLAGS) $(LIBXML_CFLAGS)
+
+TESTS = test-timezone test-clickability
 
 lib_LTLIBRARIES = libtimezonemap.la
 

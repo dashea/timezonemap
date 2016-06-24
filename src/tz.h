@@ -30,7 +30,7 @@
 
 #include "cc-timezone-location.h"
 
-# define TZ_DATA_FILE "/usr/share/libtimezonemap/cities15000.txt"
+# define TZ_DATA_FILE "/usr/share/libtimezonemap/citiesInfo.txt"
 
 # define ADMIN1_FILE "/usr/share/libtimezonemap/admin1Codes.txt"
 # define COUNTRY_FILE "/usr/share/libtimezonemap/countryInfo.txt"

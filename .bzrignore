@@ -20,6 +20,10 @@ m4/*.m4
 src/test-timezone
 src/test-timezone.trs
 src/test-timezone.log
+src/test-clickability
+src/test-clickability.trs
+src/test-clickability.log
 src/test-suite.log
 src/timezonemap.pc
+src/data/citiesInfo.txt
 INSTALL

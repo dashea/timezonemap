@@ -8,6 +8,11 @@ admin1Codes.txt, cities15000.txt, countryInfo.txt
   These three files come from the geonames.org database. Simply find the files
   in http://download.geonames.org/export/dump/ and copy them to this directory.
 
+citiesExtra.txt
+  These are additional cities with populations less than 15,000 used to
+  provide clickable locations for sparesly populated timezones. It consists of
+  extra lines from the geonames database.
+
 backward
   This file lists links between current time zone names and obsolete time zone
   names. It comes from the tzdata at https://www.iana.org/time-zones

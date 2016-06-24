@@ -61,6 +61,9 @@ PKG_CHECK_MODULES(LIBTIMEZONEMAP, gio-2.0 >= $GIO_REQUIRED_VERSION
                                   librsvg-2.0)
 LIBTIMEZONEMAP_LIBS="$LIBTIMEZONEMAP_LIBS $LIBM"
 
+# Extra requirements for tests
+PKG_CHECK_MODULES(LIBXML, libxml-2.0)
+
 GOBJECT_INTROSPECTION_CHECK([0.6.7])
 
 ###########################
