@@ -18,5 +18,8 @@ m4/*.m4
 *.lo
 *.la
 src/test-timezone
+src/test-timezone.trs
+src/test-timezone.log
+src/test-suite.log
 src/timezonemap.pc
 INSTALL

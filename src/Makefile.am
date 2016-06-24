@@ -24,15 +24,22 @@ AM_CPPFLAGS =						\
 
 noinst_PROGRAMS = test-timezone
 
-test_timezone_SOURCES = test-timezone.c cc-timezone-location.c tz.c tz.h
-test_timezone_LDADD = $(LIBTIMEZONEMAP_LIBS) -lm
+
+all-local: check
+
+AM_TESTS_ENVIRONMENT = TZ_DATA_FILE=$(srcdir)/data/cities15000.txt ; \
+		       ADMIN1_FILE=$(srcdir)/data/admin1Codes.txt ; \
+		       COUNTRY_FILE=$(srcdir)/data/countryInfo.txt ; \
+		       DATADIR=$(srcdir)/data ; \
+		       export TZ_DATA_FILE ADMIN1_FILE COUNTRY_FILE DATADIR ;
+
+check_PROGRAMS = test-timezone
+
+test_timezone_SOURCES = test-timezone.c
+test_timezone_LDADD = $(LIBTIMEZONEMAP_LIBS) -lm libtimezonemap.la
 test_timezone_CFLAGS = $(LIBTIMEZONEMAP_CFLAGS)
 
-all-local: check-local
-
-check-local: test-timezone
-	TZ_DATA_FILE=$(srcdir)/data/cities15000.txt ADMIN1_FILE=$(srcdir)/data/admin1Codes.txt COUNTRY_FILE=$(srcdir)/data/countryInfo.txt \
-				 $(builddir)/test-timezone $(srcdir)/data
+TESTS = test-timezone
 
 lib_LTLIBRARIES = libtimezonemap.la
 

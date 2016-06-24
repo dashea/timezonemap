@@ -15,13 +15,25 @@ int main (int argc, char **argv)
     RsvgHandle *svg;
     gchar *path;
 
-        setlocale (LC_ALL, "");
+    setlocale (LC_ALL, "");
 
     if (argc == 2) 
       {
         pixmap_dir = g_strdup (argv[1]);
       } else if (argc == 1) {
-        pixmap_dir = g_strdup ("data/");
+        const char *datadir = g_getenv("DATADIR");
+        if (datadir != NULL)
+          { 
+            pixmap_dir = g_strdup (datadir);
+          } else {
+            pixmap_dir = g_strdup ("./data");
+          }
+
+        if (! g_file_test (pixmap_dir, G_FILE_TEST_IS_DIR))
+          {
+            g_message("Pixmap directory %s does not exist", pixmap_dir);
+            return 1;
+          }
       } else {
         g_message ("Usage: %s [PIXMAP DIRECTORY]", argv[0]);
         return 1;
