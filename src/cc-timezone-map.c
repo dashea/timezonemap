@@ -759,7 +759,9 @@ cc_timezone_map_realize (GtkWidget *widget)
 
   gdk_window_set_user_data (window, widget);
 
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
   cursor = gdk_cursor_new (GDK_HAND2);
+G_GNUC_END_IGNORE_DEPRECATIONS
   gdk_window_set_cursor (window, cursor);
 
   gtk_widget_set_window (widget, window);
@@ -818,14 +820,20 @@ cc_timezone_map_draw (GtkWidget *widget,
 
   gtk_widget_get_allocation (widget, &alloc);
 
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
   style = gtk_widget_get_style (widget);
+G_GNUC_END_IGNORE_DEPRECATIONS
 
   /* Check if insensitive */
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
   if (gtk_widget_get_state (widget) == GTK_STATE_INSENSITIVE)
     alpha = 0.5;
+G_GNUC_END_IGNORE_DEPRECATIONS
 
   /* paint background */
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
   gdk_cairo_set_source_color (cr, &style->bg[gtk_widget_get_state (widget)]);
+G_GNUC_END_IGNORE_DEPRECATIONS
   cairo_paint (cr);
   cairo_set_source (cr, priv->background);
   cairo_paint_with_alpha (cr, alpha);
