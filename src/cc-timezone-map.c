@@ -963,7 +963,7 @@ get_location_offset (CcTimezoneLocation *location)
 
   /* Query the zone based on the current time, since otherwise the data
    * may not make sense. */
-  curtime = g_get_real_time () / 1000;    /* convert to seconds */
+  curtime = g_get_real_time () / 1000000;    /* convert to seconds */
   interval = g_time_zone_find_interval (zone, G_TIME_TYPE_UNIVERSAL, curtime);
 
   offset = g_time_zone_get_offset (zone, interval);
