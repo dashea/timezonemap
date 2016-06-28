@@ -28,6 +28,7 @@
 #include <math.h>
 #include "tz.h"
 #include <librsvg/rsvg.h>
+#include <string.h>
 
 G_DEFINE_TYPE (CcTimezoneMap, cc_timezone_map, GTK_TYPE_WIDGET)
 
@@ -817,10 +818,42 @@ cc_timezone_map_set_timezone (CcTimezoneMap *map,
                               const gchar   *timezone)
 {
   GPtrArray *locations;
+  GList *zone_locations = NULL;
+  GList *location_node = NULL;
   guint i;
-  char *real_tz;
+  const char *real_tz;
+  const char *tz_city_start;
+  char *tz_city;
+  char *tmp;
+  gboolean found_location = FALSE;
 
   real_tz = g_hash_table_lookup (map->priv->alias_db, timezone);
+  if (!real_tz)
+      real_tz = timezone;
+
+  tz_city_start = strrchr (timezone, '/');
+  if (tz_city_start)
+    {
+      /* Move to the first character after the / */
+      tz_city_start++;
+    }
+  else
+    {
+      tz_city_start = real_tz;
+    }
+
+  tz_city = g_strdup(tz_city_start);
+
+  /* Replace the underscores with spaces */
+  tmp = tz_city;
+  while (*tmp != '\0')
+    {
+      if (*tmp == '_')
+        {
+          *tmp = ' ';
+        }
+      tmp++;
+    }
 
   locations = tz_get_locations (map->priv->tzdb);
 
@@ -828,12 +861,76 @@ cc_timezone_map_set_timezone (CcTimezoneMap *map,
     {
       CcTimezoneLocation *loc = locations->pdata[i];
 
-      if (!g_strcmp0 (cc_timezone_location_get_zone(loc), real_tz ? real_tz : timezone))
+      if (!g_strcmp0 (cc_timezone_location_get_zone (loc), real_tz))
         {
-          set_location (map, loc);
-          break;
+          zone_locations = g_list_prepend (zone_locations, loc);
         }
     }
+
+  /* No location found. Use GLib to set the highlight. g_time_zone_new always
+   * returns a GTimeZone, so invalid zones will just be offset 0.
+   */
+  if (zone_locations == NULL)
+    {
+      CcTimezoneLocation *test_location = cc_timezone_location_new ();
+      gdouble offset;
+
+      cc_timezone_location_set_zone (test_location, real_tz);
+      offset = get_location_offset (test_location);
+      g_object_unref (test_location);
+
+      set_location (map, NULL);
+      cc_timezone_map_set_selected_offset (map, offset);
+
+      return;
+    }
+
+  /* Look for a location with a name that either starts or ends with the name
+   * of the zone
+   */
+  location_node = zone_locations;
+  while (location_node != NULL)
+    {
+      const gchar *name = cc_timezone_location_get_en_name (location_node->data);
+      if (!strncmp (name, tz_city, strlen (tz_city)) ||
+          ((strlen(name) > strlen(tz_city)) &&
+           !strncmp (name + (strlen(name) - strlen(tz_city)), tz_city, strlen (tz_city))))
+        {
+          set_location (map, location_node->data);
+          found_location = TRUE;
+          break;
+        }
+
+      location_node = location_node->next;
+    }
+
+  /* If that didn't work, try by state */
+  if (!found_location)
+    {
+      location_node = zone_locations;
+      while (location_node != NULL)
+        {
+          const gchar *state = cc_timezone_location_get_state (location_node->data);
+
+          if ((state != NULL) &&
+                  !strncmp (state, tz_city, strlen (tz_city)))
+            {
+              set_location (map, location_node->data);
+              found_location = TRUE;
+              break;
+            }
+
+          location_node = location_node->next;
+        }
+    }
+
+  /* If nothing matched, just use the first location */
+  if (!found_location)
+    {
+      set_location (map, zone_locations->data);
+    }
+
+  g_list_free (zone_locations);
 }
 
 void
