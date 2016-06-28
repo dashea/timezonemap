@@ -777,6 +777,10 @@ convert_longtitude_to_x (gdouble longitude, gint map_width)
   x = (map_width * (180.0 + longitude) / 360.0)
     + (map_width * xdeg_offset / 180.0);
 
+  /* If x is negative, wrap back to the beginning */
+  if (x < 0)
+      x = (gdouble) map_width + x;
+
   return x;
 }
 
