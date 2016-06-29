@@ -31,8 +31,6 @@ AM_CPPFLAGS =						\
 noinst_PROGRAMS = test-timezone
 
 
-all-local: check
-
 AM_TESTS_ENVIRONMENT = TZ_DATA_FILE=$(srcdir)/data/citiesInfo.txt ; \
 		       ADMIN1_FILE=$(srcdir)/data/admin1Codes.txt ; \
 		       COUNTRY_FILE=$(srcdir)/data/countryInfo.txt ; \
