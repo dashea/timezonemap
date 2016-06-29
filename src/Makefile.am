@@ -15,7 +15,10 @@ dist_noinst_DATA = \
 	data/citiesExtra.txt
 
 data/citiesInfo.txt: data/cities15000.txt data/citiesExtra.txt
-	cat data/cities15000.txt data/citiesExtra.txt > $@
+	@$(MKDIR_P) $(builddir)/data
+	$(AM_V_GEN)cat $(srcdir)/data/cities15000.txt $(srcdir)/data/citiesExtra.txt > $@
+
+CLEANFILES = data/citiesInfo.txt
 
 tzdatadir = $(pkgdatadir)/
 dist_tzdata_DATA = data/backward
@@ -31,7 +34,7 @@ AM_CPPFLAGS =						\
 noinst_PROGRAMS = test-timezone
 
 
-AM_TESTS_ENVIRONMENT = TZ_DATA_FILE=$(srcdir)/data/citiesInfo.txt ; \
+AM_TESTS_ENVIRONMENT = TZ_DATA_FILE=$(builddir)/data/citiesInfo.txt ; \
 		       ADMIN1_FILE=$(srcdir)/data/admin1Codes.txt ; \
 		       COUNTRY_FILE=$(srcdir)/data/countryInfo.txt ; \
 		       DATADIR=$(srcdir)/data ; \
