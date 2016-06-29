@@ -85,6 +85,7 @@ AC_ARG_ENABLE(localinstall, AS_HELP_STRING([--enable-localinstall], [install all
 
 AC_CONFIG_FILES([
 Makefile
+glade/Makefile
 src/Makefile
 src/timezonemap.pc
 ])

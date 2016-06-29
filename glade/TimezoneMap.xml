@@ -1,0 +1,47 @@
+<glade-catalog name="TimezoneMap"
+               version="0.4"
+               library="timezonemap"
+               domain="glade-3"
+               depends="gtk+">
+
+  <glade-widget-classes>
+    <glade-widget-class title="Timezone Map"
+                        name="CcTimezoneMap"
+                        icon-name="widget-gtk-image"
+                        generic-name="TimezoneMap">
+      <signals>
+        <signal id="location-changed"/>
+      </signals>
+    </glade-widget-class>
+
+    <glade-widget-class title="Timezone Entry Complection"
+                        name="CcTimezoneCompletion"
+                        generic-name="TimezoneCompletion">
+      <!-- From GtkEntryCompletion -->
+      <add-child-verify-function>glade_gtk_cell_layout_add_verify</add-child-verify-function>
+      <add-child-function>glade_gtk_cell_layout_add_child</add-child-function>
+      <remove-child-function>glade_gtk_cell_layout_remove_child</remove-child-function>
+      <get-children-function>glade_gtk_cell_layout_get_children</get-children-function>
+      <read-child-function>glade_gtk_cell_layout_read_child</read-child-function>
+      <write-child-function>glade_gtk_cell_layout_write_child</write-child-function>
+      <action-activate-function>glade_gtk_cell_layout_action_activate</action-activate-function>
+      <child-set-property-function>glade_gtk_cell_layout_set_child_property</child-set-property-function>
+      <child-get-property-function>glade_gtk_cell_layout_get_child_property</child-get-property-function>
+
+      <properties>
+        <property id="model" disabled="True"/>
+        <property id="text-column" disabled="True"/>
+        <property id="popup-set-width" disabled="True"/>
+      </properties>
+
+      <actions>
+        <action stock="gtk-edit" important="True" id="launch_editor" name="Edit&#8230;"></action>
+      </actions>
+    </glade-widget-class>
+  </glade-widget-classes>
+
+  <glade-widget-group name="timezonemap-misc-widgets" title="TimezoneMap Widgets">
+    <glade-widget-class-ref name="CcTimezoneMap"/>
+    <glade-widget-class-ref name="CcTimezoneCompletion"/>
+  </glade-widget-group>
+</glade-catalog>
