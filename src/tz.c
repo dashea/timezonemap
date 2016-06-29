@@ -146,7 +146,6 @@ tz_load_db (void)
 {
     const gchar *tz_data_file, *admin1_file, *country_file;
     TzDB *tz_db;
-    char buf[4096];
 
     tz_data_file = tz_data_file_get ("TZ_DATA_FILE", TZ_DATA_FILE);
     if (!tz_data_file) 
@@ -206,42 +205,6 @@ tz_db_free (TzDB *db)
     g_free (db);
 }
 
-static gdouble
-convert_longtitude_to_x (gdouble longitude, gint map_width)
-{
-  const gdouble xdeg_offset = -6;
-  gdouble x;
-
-  x = (map_width * (180.0 + longitude) / 360.0)
-    + (map_width * xdeg_offset / 180.0);
-
-  return x;
-}
-
-static gdouble
-radians (gdouble degrees)
-{
-  return (degrees / 360.0) * G_PI * 2;
-}
-
-static gdouble
-convert_latitude_to_y (gdouble latitude, gdouble map_height)
-{
-  gdouble bottom_lat = -59;
-  gdouble top_lat = 81;
-  gdouble top_per, y, full_range, top_offset, map_range;
-
-  top_per = top_lat / 180.0;
-  y = 1.25 * log (tan (G_PI_4 + 0.4 * radians (latitude)));
-  full_range = 4.6068250867599998;
-  top_offset = full_range * top_per;
-  map_range = fabs (1.25 * log (tan (G_PI_4 + 0.4 * radians (bottom_lat))) - top_offset);
-  y = fabs (y - top_offset);
-  y = y / map_range;
-  y = y * map_height;
-  return y;
-}
-
 GPtrArray *
 tz_get_locations (TzDB *db)
 {
@@ -263,9 +226,6 @@ tz_location_get_utc_offset (CcTimezoneLocation *loc)
 gint
 tz_location_set_locally (CcTimezoneLocation *loc)
 {
-    time_t curtime;
-    struct tm *curzone;
-    gboolean is_dst = FALSE;
     gint correction = 0;
     const gchar *zone;
 
@@ -273,22 +233,7 @@ tz_location_set_locally (CcTimezoneLocation *loc)
     zone = cc_timezone_location_get_zone(loc);
     g_return_val_if_fail (zone != NULL, 0);
 
-    curtime = time (NULL);
-    curzone = localtime (&curtime);
-    is_dst = curzone->tm_isdst;
-
     setenv ("TZ", zone, 1);
-#if 0
-    curtime = time (NULL);
-    curzone = localtime (&curtime);
-
-    if (!is_dst && curzone->tm_isdst) {
-        correction = (60 * 60);
-    }
-    else if (is_dst && !curzone->tm_isdst) {
-        correction = 0;
-    }
-#endif
 
     return correction;
 }

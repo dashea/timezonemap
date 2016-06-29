@@ -589,7 +589,6 @@ set_location (CcTimezoneMap *map,
               CcTimezoneLocation    *location)
 {
   CcTimezoneMapPrivate *priv = map->priv;
-  TzInfo *info;
 
   priv->location = location;
 

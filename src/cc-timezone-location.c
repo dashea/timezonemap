@@ -181,13 +181,6 @@ cc_timezone_location_dispose (GObject *object)
 }
 
 static void
-cc_timezone_location_finalize (GObject *object)
-{
-  CcTimezoneLocationPrivate *priv = CC_TIMEZONE_LOCATION (object)->priv;
-  G_OBJECT_CLASS (cc_timezone_location_parent_class)->finalize (object);
-}
-
-static void
 cc_timezone_location_class_init (CcTimezoneLocationClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
@@ -196,7 +189,6 @@ cc_timezone_location_class_init (CcTimezoneLocationClass *klass)
   object_class->get_property = cc_timezone_location_get_property;
   object_class->set_property = cc_timezone_location_set_property;
   object_class->dispose = cc_timezone_location_dispose;
-  object_class->finalize = cc_timezone_location_finalize;
 
   g_object_class_install_property(object_class,
                                   PROP_COUNTRY,
@@ -271,8 +263,7 @@ cc_timezone_location_class_init (CcTimezoneLocationClass *klass)
 
 static void
 cc_timezone_location_init (CcTimezoneLocation *self) {
-  CcTimezoneLocationPrivate *priv;
-  priv = self->priv = TIMEZONE_LOCATION_PRIVATE (self);
+  self->priv = TIMEZONE_LOCATION_PRIVATE (self);
 }
 
 CcTimezoneLocation *

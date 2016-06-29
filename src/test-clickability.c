@@ -26,7 +26,6 @@ int main(int argc, char **argv)
     const char *pixmap_dir;
     gchar *path;
 
-    GError *error = NULL;
     gchar *endptr;
     gdouble timezone_offset;
     int i, j;
@@ -79,10 +78,22 @@ int main(int argc, char **argv)
     /* Iterate over each layer, which can be found as <g> element wit
      * inkscape:groupmode="layer" */
     xpathCtx = xmlXPathNewContext(doc);
-    xmlXPathRegisterNs(xpathCtx, "svg", "http://www.w3.org/2000/svg");
-    xmlXPathRegisterNs(xpathCtx, "inkscape", "http://www.inkscape.org/namespaces/inkscape");
+    xmlXPathRegisterNs(
+            xpathCtx,
+            (const xmlChar *) "svg",
+            (const xmlChar *) "http://www.w3.org/2000/svg"
+            );
+    xmlXPathRegisterNs(
+            xpathCtx,
+            (const xmlChar *) "inkscape",
+            (const xmlChar *) "http://www.inkscape.org/namespaces/inkscape"
+            );
 
-    xpathObj = xmlXPathEvalExpression("//svg:g[@inkscape:groupmode = 'layer']", xpathCtx);
+    xpathObj = xmlXPathEvalExpression(
+            (const xmlChar *)"//svg:g[@inkscape:groupmode = 'layer']",
+            xpathCtx
+            );
+
     if (!xpathObj)
       {
         g_message("Unable to evaluate xpath");
@@ -101,14 +112,14 @@ int main(int argc, char **argv)
 
     for (i = 0; i < nodes->nodeNr; i++)
       {
-        char *id = xmlGetProp(nodes->nodeTab[i], "id");
+        xmlChar *id = xmlGetProp(nodes->nodeTab[i], (const xmlChar *) "id");
 
         if (id[0] != 'm' && id[0] != 'p')
           {
             continue;
           }
 
-        timezone_offset = g_ascii_strtod (id+1, &endptr);
+        timezone_offset = g_ascii_strtod ((gchar *) id+1, &endptr);
         if (*endptr != '\0')
           {
             g_message ("Unable to parse layer name %s", id);
