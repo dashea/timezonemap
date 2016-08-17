@@ -29,6 +29,7 @@
 #include "tz.h"
 #include <librsvg/rsvg.h>
 #include <string.h>
+#include <stdlib.h>
 
 G_DEFINE_TYPE (CcTimezoneMap, cc_timezone_map, GTK_TYPE_WIDGET)
 
@@ -596,15 +597,18 @@ set_location (CcTimezoneMap *map,
   {
     priv->selected_offset = get_location_offset (priv->location);
     priv->show_offset = TRUE;
+    setenv("TZ", cc_timezone_location_get_zone(location), 1);
   }
   else
   {
     priv->show_offset = FALSE;
     priv->selected_offset = 0.0;
+    unsetenv("TZ");
   }
 
   render_highlight (map);
   gtk_widget_queue_draw (GTK_WIDGET (map));
+
 
   g_signal_emit (map, signals[LOCATION_CHANGED], 0, priv->location);
 
