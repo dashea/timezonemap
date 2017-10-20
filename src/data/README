@@ -24,7 +24,9 @@ time_zones_countryInfo-orig.svg
   The master SVG used to generate the map images. It is lovingly hand-updated,
   mostly by using inkscape to trace over whatever map image is convenient.
 
-  Each layer must also have an id corresponding to the layer name.
+  Each layer must also have an id corresponding to the layer name. Each layer
+  must also be visible when saving the file, otherwise librsvg won't render
+  anything.
 
   The background layer is generated from the individual timezone layers. Here
   is one way to do it:
