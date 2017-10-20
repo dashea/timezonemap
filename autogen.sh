@@ -1,11 +1,11 @@
 #!/bin/sh
 
-PKG_NAME="libtimezonemap"
+srcdir=`dirname "$0"`
+test -z "$srcdir" && srcdir=.
 
 which gnome-autogen.sh || {
 	echo "You need gnome-common from GNOME Git"
 	exit 1
 }
 
-USE_GNOME2_MACROS=1 \
 . gnome-autogen.sh $@
