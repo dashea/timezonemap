@@ -228,71 +228,6 @@ cc_timezone_map_get_preferred_height (GtkWidget *widget,
     *natural = 173;
 }
 
-/* Call whenever the allocation or offset changes */
-static void
-render_highlight (CcTimezoneMap *cc)
-{
-  CcTimezoneMapPrivate *priv = cc->priv;
-  GtkAllocation alloc;
-  RsvgDimensionData svg_dimensions;
-  gdouble scale_x, scale_y;
-  cairo_surface_t *surface;
-  cairo_t *cr;
-  gchar *layer_name;
-  gdouble *hash_key;
-
-  /* The reference to the cairo_pattern_t object is held by highlight_table */
-
-  /* If no highlight is displayed, just unset the pointer */
-  if (!priv->show_offset)
-    {
-      if (priv->highlight)
-        {
-          priv->highlight = NULL;
-        }
-
-      return;
-    }
-
-  /* Check if the highlight has already been rendered */
-  priv->highlight = g_hash_table_lookup (priv->highlight_table,
-                                         &priv->selected_offset);
-  if (priv->highlight)
-    return;
-
-  layer_name = g_strdup_printf("#%c%g",
-                               priv->selected_offset > 0 ? 'p' : 'm',
-                               fabs(priv->selected_offset));
-  gtk_widget_get_allocation (GTK_WIDGET (cc), &alloc);
-
-  /* Use the size of the background layer as the scale */
-  rsvg_handle_get_dimensions_sub (priv->map_svg, &svg_dimensions, "#background");
-  scale_x = (double)alloc.width / svg_dimensions.width;
-  scale_y = (double)alloc.height / svg_dimensions.height;
-
-  surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32,
-                                        alloc.width,
-                                        alloc.height);
-  cr = cairo_create (surface);
-
-  cairo_scale (cr, scale_x, scale_y);
-  rsvg_handle_render_cairo_sub (priv->map_svg, cr, layer_name);
-  g_free(layer_name);
-  cairo_surface_flush (surface);
-
-  priv->highlight = cairo_pattern_create_for_surface (surface);
-
-  cairo_surface_destroy (surface);
-  cairo_destroy (cr);
-
-  /* Save the pattern in the hash table */
-  hash_key = g_malloc (sizeof (gdouble));
-  *hash_key = priv->selected_offset;
-  g_hash_table_insert (priv->highlight_table,
-                       hash_key,
-                       priv->highlight);
-}
-
 /* Update the cached map patterns when the widget allocation changes */
 static void
 cc_timezone_map_size_allocate (GtkWidget *widget,
@@ -333,7 +268,6 @@ cc_timezone_map_size_allocate (GtkWidget *widget,
 
   /* Invalidate the highlight cache and render the current one */
   g_hash_table_remove_all (priv->highlight_table);
-  render_highlight (CC_TIMEZONE_MAP(widget));
 }
 
 static void
@@ -457,12 +391,6 @@ G_GNUC_END_IGNORE_DEPRECATIONS
     cairo_show_text(cr, priv->watermark);
     cairo_stroke(cr);
   }
-
-  if (priv->highlight)
-    {
-      cairo_set_source (cr, priv->highlight);
-      cairo_paint_with_alpha (cr, alpha);
-    }
 
   if (!priv->location) {
     return TRUE;
@@ -606,7 +534,6 @@ set_location (CcTimezoneMap *map,
     unsetenv("TZ");
   }
 
-  render_highlight (map);
   gtk_widget_queue_draw (GTK_WIDGET (map));
 
 
@@ -1051,6 +978,5 @@ void cc_timezone_map_set_selected_offset (CcTimezoneMap *map, gdouble offset)
   map->priv->selected_offset = offset;
   map->priv->show_offset = TRUE;
   g_object_notify(G_OBJECT(map), "selected-offset");
-  render_highlight (map);
   gtk_widget_queue_draw (GTK_WIDGET (map));
 }
