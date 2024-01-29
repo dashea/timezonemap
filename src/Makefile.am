@@ -1,5 +1,3 @@
-CLEANFILES = 
-
 uidir = $(pkgdatadir)
 dist_ui_DATA = \
 	data/pin.png \
@@ -77,8 +75,8 @@ libtimezonemap_la_LDFLAGS = \
 	-no-undefined \
 	-export-symbols-regex "^[^_].*"
 
-if HAVE_INTROSPECTION
 -include $(INTROSPECTION_MAKEFILE)
+if HAVE_INTROSPECTION
 INTROSPECTION_SCANNER_ARGS = --add-include-path=$(srcdir)
 INTROSPECTION_COMPILER_ARGS = --includedir=$(srcdir)
 

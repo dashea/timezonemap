@@ -1,11 +1,9 @@
 #!/bin/sh
 
-srcdir=`dirname "$0"`
-test -z "$srcdir" && srcdir=.
+# This has the most confusing failure case if missing (HAVE_INTROSPECTION does not appear in AM_CONDITIONAL), so check for it up front
+if ! pkg-config gobject-introspection-1.0 ; then
+    echo "gobject-introspection development files are required"
+    exit 1
+fi
 
-which gnome-autogen.sh || {
-	echo "You need gnome-common from GNOME Git"
-	exit 1
-}
-
-. gnome-autogen.sh $@
+autoreconf -i
