@@ -26,11 +26,7 @@
 #include <glib.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
-#include <math.h>
 #include <string.h>
-#include <float.h>
 #include "tz.h"
 
 
@@ -209,82 +205,6 @@ GPtrArray *
 tz_get_locations (TzDB *db)
 {
     return db->locations;
-}
-
-    glong
-tz_location_get_utc_offset (CcTimezoneLocation *loc)
-{
-    TzInfo *tz_info;
-    glong offset;
-
-    tz_info = tz_info_from_location (loc);
-    offset = tz_info->utc_offset;
-    tz_info_free (tz_info);
-    return offset;
-}
-
-gint
-tz_location_set_locally (CcTimezoneLocation *loc)
-{
-    gint correction = 0;
-    const gchar *zone;
-
-    g_return_val_if_fail (loc != NULL, 0);
-    zone = cc_timezone_location_get_zone(loc);
-    g_return_val_if_fail (zone != NULL, 0);
-
-    setenv ("TZ", zone, 1);
-
-    return correction;
-}
-
-TzInfo *
-tz_info_from_location (CcTimezoneLocation *loc)
-{
-    TzInfo *tzinfo;
-    time_t curtime;
-    struct tm *curzone;
-    const gchar *zone;
-
-    g_return_val_if_fail (loc != NULL, NULL);
-    zone = cc_timezone_location_get_zone(loc);
-    g_return_val_if_fail (zone != NULL, NULL);
-
-    setenv ("TZ", zone, 1);
-
-#if 0
-    tzset ();
-#endif
-    tzinfo = g_new0 (TzInfo, 1);
-
-    curtime = time (NULL);
-    curzone = localtime (&curtime);
-
-    /* Currently this solution doesnt seem to work - I get that */
-    /* America/Phoenix uses daylight savings, which is wrong    */
-    tzinfo->tzname_normal = g_strdup (curzone->tm_zone);
-    if (curzone->tm_isdst)
-        tzinfo->tzname_daylight =
-            g_strdup (&curzone->tm_zone[curzone->tm_isdst]);
-    else
-        tzinfo->tzname_daylight = NULL;
-
-    tzinfo->utc_offset = curzone->tm_gmtoff;
-
-    tzinfo->daylight = curzone->tm_isdst;
-
-    return tzinfo;
-}
-
-
-    void
-tz_info_free (TzInfo *tzinfo)
-{
-    g_return_if_fail (tzinfo != NULL);
-
-    if (tzinfo->tzname_normal) g_free (tzinfo->tzname_normal);
-    if (tzinfo->tzname_daylight) g_free (tzinfo->tzname_daylight);
-    g_free (tzinfo);
 }
 
 /* ----------------- *

@@ -26,8 +26,6 @@ AM_PROG_CC_C_O
 
 AC_CHECK_FUNCS([setenv])
 AC_CHECK_FUNCS([strrchr])
-AC_CHECK_FUNCS([tzset])
-AC_CHECK_HEADERS([unistd.h])
 AC_STRUCT_TIMEZONE
 
 # Initialize libtool
@@ -49,10 +47,6 @@ PKG_CHECK_MODULES(LIBTIMEZONEMAP, gtk+-3.0 >= $GTK3_REQUIRED_VERSION
                                   json-glib-1.0
                                   librsvg-2.0)
 LIBTIMEZONEMAP_LIBS="$LIBTIMEZONEMAP_LIBS $LIBM"
-
-# Extra requirements for tests
-PKG_CHECK_MODULES(LIBXML, libxml-2.0)
-AC_CHECK_FUNCS([setlocale])
 
 GOBJECT_INTROSPECTION_CHECK([0.6.7])
 

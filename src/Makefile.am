@@ -29,27 +29,12 @@ AM_CPPFLAGS =						\
 	-DDATADIR="\"$(uidir)\""			\
 	$(NULL)
 
-noinst_PROGRAMS = test-timezone
-
 
 AM_TESTS_ENVIRONMENT = TZ_DATA_FILE=$(builddir)/data/citiesInfo.txt ; \
 		       ADMIN1_FILE=$(srcdir)/data/admin1Codes.txt ; \
 		       COUNTRY_FILE=$(srcdir)/data/countryInfo.txt ; \
 		       DATADIR=$(srcdir)/data ; \
 		       export TZ_DATA_FILE ADMIN1_FILE COUNTRY_FILE DATADIR ;
-
-check_PROGRAMS = test-timezone \
-		 test-clickability
-
-test_timezone_SOURCES = test-timezone.c
-test_timezone_LDADD = $(LIBTIMEZONEMAP_LIBS) -lm libtimezonemap.la
-test_timezone_CFLAGS = $(LIBTIMEZONEMAP_CFLAGS)
-
-test_clickability_SOURCES = test-clickability.c
-test_clickability_LDADD = $(LIBTIMEZONEMAP_LIBS) $(LIBXML_LIBS) libtimezonemap.la
-test_clickability_CFLAGS = $(LIBTIMEZONEMAP_CFLAGS) $(LIBXML_CFLAGS)
-
-TESTS = test-timezone test-clickability
 
 lib_LTLIBRARIES = libtimezonemap.la
 

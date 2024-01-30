@@ -38,36 +38,15 @@
 G_BEGIN_DECLS
 
 typedef struct _TzDB TzDB;
-typedef struct _TzInfo TzInfo;
 
 struct _TzDB
 {
 	GPtrArray *locations;
 };
 
-
-/* see the glibc info page information on time zone information */
-/*  tzname_normal    is the default name for the timezone */
-/*  tzname_daylight  is the name of the zone when in daylight savings */
-/*  utc_offset       is offset in seconds from utc */
-/*  daylight         if non-zero then location obeys daylight savings */
-
-struct _TzInfo
-{
-	gchar *tzname_normal;
-	gchar *tzname_daylight;
-	glong utc_offset;
-	gint daylight;
-};
-
-
 TzDB      *tz_load_db                 (void);
 void       tz_db_free                 (TzDB *db);
 GPtrArray *tz_get_locations           (TzDB *db);
-glong      tz_location_get_utc_offset (CcTimezoneLocation *loc);
-gint       tz_location_set_locally    (CcTimezoneLocation *loc);
-TzInfo    *tz_info_from_location      (CcTimezoneLocation *loc);
-void       tz_info_free               (TzInfo *tz_info);
 
 G_END_DECLS
 
