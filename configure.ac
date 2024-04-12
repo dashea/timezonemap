@@ -40,10 +40,10 @@ PKG_PROG_PKG_CONFIG
 ###########################
 
 GTK3_REQUIRED_VERSION=3.1.4
-SOUP_REQUIRED_VERSION=2.42.0
+SOUP_REQUIRED_VERSION=3.0.7
 
 PKG_CHECK_MODULES(LIBTIMEZONEMAP, gtk+-3.0 >= $GTK3_REQUIRED_VERSION
-                                  libsoup-2.4 >= $SOUP_REQUIRED_VERSION
+                                  libsoup-3.0 >= $SOUP_REQUIRED_VERSION
                                   json-glib-1.0
                                   librsvg-2.0)
 LIBTIMEZONEMAP_LIBS="$LIBTIMEZONEMAP_LIBS $LIBM"

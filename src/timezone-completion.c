@@ -270,9 +270,10 @@ geonames_data_ready (GObject *object, GAsyncResult *res, gpointer user_data)
   CcTimezoneCompletionPrivate * priv = completion->priv;
   GError * error = NULL;
   GInputStream * stream;
-  SoupMessage *message;
+  const gchar * reason_phrase;
+  SoupStatus status_code;
 
-  stream = soup_request_send_finish (SOUP_REQUEST (object), res, &error);
+  stream = soup_session_send_finish (priv->soup_session, res, &error);
   if (stream == NULL)
     {
       if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
@@ -283,8 +284,9 @@ geonames_data_ready (GObject *object, GAsyncResult *res, gpointer user_data)
       return;
     }
 
-  message = soup_request_http_get_message (SOUP_REQUEST_HTTP (object));
-  if (message->status_code == SOUP_STATUS_OK)
+  reason_phrase = soup_message_get_reason_phrase (SOUP_MESSAGE (object));
+  status_code = soup_message_get_status (SOUP_MESSAGE (object));
+  if (status_code == SOUP_STATUS_OK)
     {
       JsonParser *parser;
 
@@ -296,10 +298,10 @@ geonames_data_ready (GObject *object, GAsyncResult *res, gpointer user_data)
   else
     {
       g_warning ("Unable to fetch geonames (server responded with: %u %s)",
-                 message->status_code, message->reason_phrase);
+                 status_code, reason_phrase);
     }
 
-  g_object_unref (message);
+  g_object_unref (object);
   g_object_unref (stream);
 }
 
@@ -362,7 +364,7 @@ static gboolean
 request_zones (CcTimezoneCompletion * completion)
 {
   CcTimezoneCompletionPrivate * priv = completion->priv;
-  SoupRequest *req;
+  SoupMessage *req;
   GError *error = NULL;
 
   priv->queued_request = 0;
@@ -391,10 +393,11 @@ request_zones (CcTimezoneCompletion * completion)
   g_free (locale);
   g_free (escaped);
 
-  req = soup_session_request (priv->soup_session, url, &error);
+  req = soup_message_new (NULL, url);
   if (req)
     {
-      soup_request_send_async (req, priv->cancel, geonames_data_ready, completion);
+      soup_session_send_async (priv->soup_session, req, G_PRIORITY_DEFAULT,
+                               priv->cancel, geonames_data_ready, completion);
       g_object_unref (req);
     }
   else
